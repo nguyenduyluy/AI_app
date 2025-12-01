@@ -48,8 +48,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
     const formatMoney = (amount: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    };
 
     // SCALE COST BY FAMILY SIZE
     const calculateRecipeCost = (recipe: Recipe) => {
@@ -287,91 +285,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
     };
 
     const displayMonthLabel = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(displayMonth);
-    const currentWeekNumber = Math.ceil(currentWeekRange[0].dateObj.getDate() / 7); 
-    
-    const renderMealList = (date: Date) => {
-        const key = formatDateKey(date);
-        const meals = plannedMeals[key] || [];
-        const dailyCost = getDailyCost(date);
-
-        const tabMap: Record<string, 'Bữa sáng' | 'Bữa trưa' | 'Bữa tối'> = {
-            'breakfast': 'Bữa sáng',
-            'lunch': 'Bữa trưa',
-            'dinner': 'Bữa tối'
-        };
-
-        const targetType = tabMap[activeTab];
-        
-        const currentMeal = meals.find(m => {
-            const recipe = RECIPES_DB[m.recipeId];
-            return recipe && recipe.type === targetType;
-        });
-
-        const recipe = currentMeal ? RECIPES_DB[currentMeal.recipeId] : null;
-
-        return (
-            <div className="flex flex-col gap-4">
-                 <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-bold text-[#111813]">
-                            Bữa ăn ngày {date.getDate()}/{date.getMonth() + 1}
-                    </h3>
-                    <p className="text-sm text-gray-500">Ước tính ({totalPeople} người): <span className="font-bold text-gray-900">{dailyCost}</span></p>
-                </div>
-
-                <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
-                    {[
-                        { id: 'breakfast', label: 'Sáng' },
-                        { id: 'lunch', label: 'Trưa' },
-                        { id: 'dinner', label: 'Tối' }
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                                activeTab === tab.id 
-                                ? 'bg-white text-[#111813] shadow-sm' 
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="min-h-[120px]">
-                    {currentMeal && recipe ? (
-                        <div className={`flex gap-4 p-3 bg-white rounded-xl border border-gray-100 shadow-sm animate-fade-in transition-all ${currentMeal.status === 'completed' ? 'opacity-60 bg-gray-50' : ''}`}>
-                            <img src={recipe.image} className={`size-20 rounded-lg object-cover ${currentMeal.status === 'completed' ? 'grayscale' : ''}`} alt={recipe.name} />
-                            <div className="flex-1">
-                                <p className="text-xs text-gray-500 font-medium uppercase mb-1">{recipe.type}</p>
-                                <p className={`font-bold text-[#111813] mb-1 text-lg ${currentMeal.status === 'completed' ? 'line-through text-gray-500' : ''}`}>{recipe.name}</p>
-                                <p className={`text-sm font-medium ${currentMeal.status === 'completed' ? 'text-gray-400' : 'text-primary-dark'}`}>
-                                    {formatMoney(calculateRecipeCost(recipe))}
-                                    {currentMeal.isShopped && <span className="ml-2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Đã mua</span>}
-                                </p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-32 bg-gray-50 rounded-xl border border-dashed border-gray-200 gap-3">
-                            <span className="text-gray-400 text-sm">Chưa có món cho {targetType.toLowerCase()}</span>
-                            <button 
-                                onClick={() => handleSuggestSingleMeal(targetType)}
-                                disabled={isSuggesting}
-                                className="px-4 py-2 bg-[#111813] text-white text-xs font-bold rounded-full hover:bg-black transition-colors disabled:opacity-50 flex items-center gap-2"
-                            >
-                                {isSuggesting ? (
-                                    <span className="inline-block size-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                ) : (
-                                    <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                                )}
-                                Gợi ý món ăn
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    };
+    const currentWeekNumber = Math.ceil(currentWeekRange[0].dateObj.getDate() / 7);
 
 
     return (
