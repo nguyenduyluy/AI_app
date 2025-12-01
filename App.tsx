@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Screen, UserProfile, BudgetData, Transaction, PlannedMeal } from './types';
 import { calculateInitialBudget } from './services/geminiService';
@@ -23,37 +22,53 @@ const App: React.FC = () => {
 
   // 1. Load Data from LocalStorage on Mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('famplan_user');
-    const savedBudget = localStorage.getItem('famplan_budget');
-    const savedTransactions = localStorage.getItem('famplan_transactions');
-    const savedMeals = localStorage.getItem('famplan_meals');
+    try {
+        const savedUser = localStorage.getItem('famplan_user');
+        const savedBudget = localStorage.getItem('famplan_budget');
+        const savedTransactions = localStorage.getItem('famplan_transactions');
+        const savedMeals = localStorage.getItem('famplan_meals');
 
-    if (savedUser && savedBudget) {
-      setUser(JSON.parse(savedUser));
-      setBudget(JSON.parse(savedBudget));
-      if (savedTransactions) {
-        const parsedTx = JSON.parse(savedTransactions).map((t: any) => ({
-            ...t,
-            date: new Date(t.date)
-        }));
-        setTransactions(parsedTx);
-      }
-      if (savedMeals) {
-        try {
-            const parsed = JSON.parse(savedMeals);
-            const sampleKey = Object.keys(parsed)[0];
-            if (sampleKey && parsed[sampleKey].length > 0 && typeof parsed[sampleKey][0] === 'string') {
-                setPlannedMeals({});
-            } else {
-                setPlannedMeals(parsed);
+        if (savedUser && savedBudget) {
+            setUser(JSON.parse(savedUser));
+            setBudget(JSON.parse(savedBudget));
+            
+            if (savedTransactions) {
+                try {
+                    const parsedTx = JSON.parse(savedTransactions).map((t: any) => ({
+                        ...t,
+                        date: new Date(t.date)
+                    }));
+                    setTransactions(parsedTx);
+                } catch (e) {
+                    console.error("Error parsing transactions", e);
+                    setTransactions([]);
+                }
             }
-        } catch (e) {
-            setPlannedMeals({});
+            
+            if (savedMeals) {
+                try {
+                    const parsed = JSON.parse(savedMeals);
+                    // Basic validation to check structure
+                    const sampleKey = Object.keys(parsed)[0];
+                    if (sampleKey && parsed[sampleKey].length > 0 && typeof parsed[sampleKey][0] === 'string') {
+                        setPlannedMeals({}); // Reset if old format
+                    } else {
+                        setPlannedMeals(parsed);
+                    }
+                } catch (e) {
+                    console.error("Error parsing meals", e);
+                    setPlannedMeals({});
+                }
+            }
+            setCurrentScreen(Screen.DASHBOARD);
         }
-      }
-      setCurrentScreen(Screen.DASHBOARD);
+    } catch (error) {
+        console.error("Critical error loading local storage:", error);
+        // Fallback to safe state
+        localStorage.clear();
+    } finally {
+        setIsInitialized(true);
     }
-    setIsInitialized(true);
   }, []);
 
   // 2. Save Data to LocalStorage on Change
