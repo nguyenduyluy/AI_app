@@ -24,11 +24,22 @@ interface MealPlannerProps {
     onUpdatePlannedMeals: (meals: Record<string, PlannedMeal[]>) => void;
     dailyLimit: number;
     onMarkAsShopped: (startDate: Date, endDate: Date) => void;
+    onViewRecipe: (recipeId: string) => void;
     totalPeople: number;
 }
 
-const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeals, onUpdatePlannedMeals, dailyLimit, onMarkAsShopped, totalPeople = 1 }) => {
+const MealPlanner: React.FC<MealPlannerProps> = ({ 
+    onAddTransaction, 
+    plannedMeals, 
+    onUpdatePlannedMeals, 
+    dailyLimit, 
+    onMarkAsShopped, 
+    onViewRecipe,
+    totalPeople = 1 
+}) => {
     const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+    const [activeTab, setActiveTab] = useState<'breakfast' | 'lunch' | 'dinner'>('breakfast');
+
     const [selectedDate, setSelectedDate] = useState<Date>(new Date()); 
     const [displayMonth, setDisplayMonth] = useState<Date>(() => {
         const now = new Date();
@@ -285,147 +296,296 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
     };
 
     const displayMonthLabel = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(displayMonth);
-    const currentWeekNumber = Math.ceil(currentWeekRange[0].dateObj.getDate() / 7);
+    const currentWeekNumber = Math.ceil(currentWeekRange[0].dateObj.getDate() / 7); 
+    
+    const renderMealList = (date: Date) => {
+        const key = formatDateKey(date);
+        const meals = plannedMeals[key] || [];
+        const dailyCost = getDailyCost(date);
 
+        const tabMap: Record<string, 'Bữa sáng' | 'Bữa trưa' | 'Bữa tối'> = {
+            'breakfast': 'Bữa sáng',
+            'lunch': 'Bữa trưa',
+            'dinner': 'Bữa tối'
+        };
 
-    return (
-        <div className="relative flex min-h-screen w-full flex-col">
-            <header className="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-                <div className="flex size-12 shrink-0 items-center">
-                    <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-[#111813] dark:text-white/90 gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
-                        <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-                    </button>
+        const targetType = tabMap[activeTab];
+        
+        const currentMeal = meals.find(m => {
+            const recipe = RECIPES_DB[m.recipeId];
+            return recipe && recipe.type === targetType;
+        });
+
+        const recipe = currentMeal ? RECIPES_DB[currentMeal.recipeId] : null;
+
+        return (
+            <div className="flex flex-col gap-4">
+                 <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-bold text-[#111813]">
+                            Bữa ăn ngày {date.getDate()}/{date.getMonth() + 1}
+                    </h3>
+                    <p className="text-sm text-gray-500">Ước tính ({totalPeople} người): <span className="font-bold text-gray-900">{dailyCost}</span></p>
                 </div>
-                <h1 className="text-[#111813] dark:text-white/90 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Lập kế hoạch bữa ăn</h1>
-                <div className="flex w-12 items-center justify-end">
-                    <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-[#111813] dark:text-white/90 gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
-                        <span className="material-symbols-outlined text-2xl">calendar_month</span>
-                    </button>
-                </div>
-            </header>
 
-            <main className="flex-1 pb-28">
-                <div className="px-4 pt-5 pb-3">
-                    <div className="flex items-center justify-center text-center">
-                        <button className="p-2"><span className="material-symbols-outlined">chevron_left</span></button>
-                        <div className="flex-1">
-                            <p className="text-lg font-bold text-[#111813] dark:text-white/90">Tuần này</p>
-                            <p className="text-sm text-gray-500 dark:text-white/60">08/07 - 14/07</p>
-                        </div>
-                        <button className="p-2"><span className="material-symbols-outlined">chevron_right</span></button>
-                    </div>
-                </div>
-
-                <div className="flex overflow-x-auto gap-3 px-4 py-2 scrollbar-hide">
-                    {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, idx) => (
-                        <div key={idx} className={`flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px] ${idx === 0 ? 'bg-primary' : 'bg-white dark:bg-gray-800'}`}>
-                            <p className={`font-bold text-sm ${idx === 0 ? 'text-black' : 'text-[#111813] dark:text-white/90'}`}>{day}</p>
-                            <p className={`font-bold text-xl ${idx === 0 ? 'text-black' : 'text-[#111813] dark:text-white/90'}`}>{8 + idx}</p>
-                        </div>
+                <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
+                    {[
+                        { id: 'breakfast', label: 'Sáng' },
+                        { id: 'lunch', label: 'Trưa' },
+                        { id: 'dinner', label: 'Tối' }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                activeTab === tab.id 
+                                ? 'bg-white text-[#111813] shadow-sm' 
+                                : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
                     ))}
                 </div>
 
-                <div className="px-4 py-4">
-                    <div className="flex flex-col gap-4 rounded-xl p-4 border border-[#dbe6df] dark:border-white/10 bg-white dark:bg-background-dark">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-[#111813] dark:text-white/90">Bữa ăn hôm nay</h3>
-                            <p className="text-sm text-gray-500 dark:text-white/60">Ước tính: <span className="font-bold text-[#111813] dark:text-white/90">250.000₫</span></p>
+                <div className="min-h-[120px]">
+                    {currentMeal && recipe ? (
+                        <div 
+                            onClick={() => onViewRecipe(recipe.id)}
+                            className={`flex gap-4 p-3 bg-white rounded-xl border border-gray-100 shadow-sm animate-fade-in transition-all cursor-pointer hover:border-primary/30 ${currentMeal.status === 'completed' ? 'opacity-60 bg-gray-50' : ''}`}
+                        >
+                            <img src={recipe.image} className={`size-20 rounded-lg object-cover ${currentMeal.status === 'completed' ? 'grayscale' : ''}`} alt={recipe.name} />
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500 font-medium uppercase mb-1">{recipe.type}</p>
+                                <p className={`font-bold text-[#111813] mb-1 text-lg ${currentMeal.status === 'completed' ? 'line-through text-gray-500' : ''}`}>{recipe.name}</p>
+                                <p className={`text-sm font-medium ${currentMeal.status === 'completed' ? 'text-gray-400' : 'text-primary-dark'}`}>
+                                    {formatMoney(calculateRecipeCost(recipe))}
+                                    {currentMeal.isShopped && <span className="ml-2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Đã mua</span>}
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex flex-col gap-4">
-                            {plannedMeals && Object.keys(plannedMeals).length > 0 ? (
-                                Object.values(plannedMeals)
-                                    .flat()
-                                    .slice(0, 2)
-                                    .map((meal) => (
-                                        <div key={meal.id} className="flex items-center gap-4">
-                                            <div className="size-16 rounded-lg object-cover bg-gray-200"></div>
-                                            <div className="flex-1">
-                                                <p className="text-sm text-gray-500 dark:text-white/60">{meal.mealType === 'breakfast' ? 'Bữa sáng' : meal.mealType === 'lunch' ? 'Bữa trưa' : 'Bữa tối'}</p>
-                                                <p className="text-base font-bold text-[#111813] dark:text-white/90">{meal.recipe.name}</p>
-                                            </div>
-                                            <button className="text-gray-400 dark:text-white/50"><span className="material-symbols-outlined">more_vert</span></button>
-                                        </div>
-                                    ))
-                            ) : (
-                                <p className="text-sm text-gray-500 dark:text-white/60 text-center py-4">Chưa có bữa ăn nào được lập kế hoạch</p>
-                            )}
-                            <button className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 dark:border-white/20 py-4 text-gray-500 dark:text-white/60">
-                                <span className="material-symbols-outlined">add_circle</span>
-                                <span className="font-bold">Thêm bữa ăn</span>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-32 bg-gray-50 rounded-xl border border-dashed border-gray-200 gap-3">
+                            <span className="text-gray-400 text-sm">Chưa có món cho {targetType.toLowerCase()}</span>
+                            <button 
+                                onClick={() => handleSuggestSingleMeal(targetType)}
+                                disabled={isSuggesting}
+                                className="px-4 py-2 bg-[#111813] text-white text-xs font-bold rounded-full hover:bg-black transition-colors disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {isSuggesting ? (
+                                    <span className="inline-block size-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                ) : (
+                                    <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                                )}
+                                Gợi ý món ăn
                             </button>
                         </div>
-                    </div>
+                    )}
                 </div>
+            </div>
+        );
+    };
 
-                <div className="px-4 py-2">
-                    <div className="flex flex-col gap-4 rounded-xl p-4 border border-[#dbe6df] dark:border-white/10 bg-white dark:bg-background-dark">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-[#111813] dark:text-white/90">Gợi ý từ AI</h3>
-                            <a className="text-primary font-bold text-sm">Làm mới</a>
+    const shoppingListKeys = Object.keys(shoppingList).sort();
+    const hasShoppingItems = shoppingListKeys.length > 0;
+    const featuredMealKey = 'dau-sot-ca';
+    const featuredRecipe = RECIPES_DB[featuredMealKey];
+
+    return (
+        <div className="flex-1 flex flex-col pb-24 bg-background-light animate-fade-in">
+             <header className="flex items-center justify-between p-4 bg-background-light sticky top-0 z-10">
+                <button className="p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-600">
+                    <span className="material-symbols-outlined text-xl">arrow_back_ios_new</span>
+                </button>
+                <h1 className="flex-1 text-center font-bold text-lg text-[#111813]">Lập kế hoạch bữa ăn</h1>
+                <button 
+                    onClick={() => setViewMode(viewMode === 'week' ? 'month' : 'week')}
+                    className={`p-2 -mr-2 rounded-full transition-colors ${
+                        viewMode === 'month' ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 text-gray-600'
+                    }`}
+                >
+                    <span className="material-symbols-outlined text-xl">
+                        {viewMode === 'week' ? 'calendar_month' : 'view_week'}
+                    </span>
+                </button>
+            </header>
+
+            <main className="flex-col flex gap-6">
+                {viewMode === 'week' ? (
+                    <div className="bg-white pb-4 pt-2 border-b border-gray-100 animate-fade-in">
+                         <div className="flex items-center justify-center gap-4 mb-4">
+                            <span className="material-symbols-outlined text-gray-400">chevron_left</span>
+                            <div className="text-center">
+                                <p className="font-bold text-lg text-[#111813] capitalize">
+                                    Tuần {currentWeekNumber}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {currentWeekRange[0].dateObj.getDate()}/{currentWeekRange[0].dateObj.getMonth() + 1} - {currentWeekRange[6].dateObj.getDate()}/{currentWeekRange[6].dateObj.getMonth() + 1}
+                                </p>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400">chevron_right</span>
+                         </div>
+                         <div className="flex justify-between px-4 overflow-x-auto scrollbar-hide gap-2">
+                            {currentWeekRange.map((d) => {
+                                const isPlanned = !!plannedMeals[d.key] && plannedMeals[d.key].length > 0;
+                                const isSelected = isSameDay(d.dateObj, selectedDate);
+                                return (
+                                <button 
+                                    key={d.key}
+                                    onClick={() => setSelectedDate(d.dateObj)}
+                                    className={`flex flex-col items-center justify-center min-w-[50px] py-3 rounded-xl transition-all relative ${
+                                        isSelected ? 'bg-primary text-[#111813] shadow-md shadow-primary/20' : 'bg-transparent text-gray-500'
+                                    }`}
+                                >
+                                    <span className="text-xs font-bold mb-1">{d.day}</span>
+                                    <span className="text-xl font-bold">{d.dateStr}</span>
+                                    {isPlanned && !isSelected && (
+                                         <div className="absolute bottom-2 size-1 bg-green-500 rounded-full"></div>
+                                    )}
+                                </button>
+                            )})}
+                         </div>
+                    </div>
+                ) : (
+                    <div className="bg-white p-4 border-b border-gray-100 animate-fade-in shadow-sm">
+                        <div className="flex items-center justify-between mb-4 px-2">
+                            <button onClick={prevMonth} className="p-1 rounded-full hover:bg-gray-100">
+                                <span className="material-symbols-outlined text-gray-400">chevron_left</span>
+                            </button>
+                            <p className="font-bold text-lg text-[#111813] capitalize">{displayMonthLabel}</p>
+                            <button onClick={nextMonth} className="p-1 rounded-full hover:bg-gray-100">
+                                <span className="material-symbols-outlined text-gray-400">chevron_right</span>
+                            </button>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="size-24 rounded-lg object-cover bg-gray-200"></div>
-                            <div className="flex flex-col">
-                                <p className="text-sm text-gray-500 dark:text-white/60">Bữa tối • 30 phút</p>
-                                <p className="text-base font-bold text-[#111813] dark:text-white/90">Bún Chả Hà Nội</p>
-                                <p className="text-sm text-gray-600 dark:text-white/70 mt-1">Một món ăn cân bằng, tốt cho sức khỏe và phù hợp với ngân sách của bạn.</p>
+                        <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                            {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(d => (
+                                <div key={d} className="text-xs font-bold text-gray-400 py-1">{d}</div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-y-2 gap-x-1">
+                            {renderCalendar()}
+                        </div>
+                    </div>
+                )}
+
+                {viewMode === 'week' && (
+                    <div className="px-4">
+                        {renderMealList(selectedDate)}
+                    </div>
+                )}
+
+                {featuredRecipe && (
+                    <div className="px-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-[#111813]">Món ăn nổi bật</h3>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex gap-4">
+                            <img src={featuredRecipe.image} className="size-24 rounded-lg object-cover" alt={featuredRecipe.name} />
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500 mb-1">{featuredRecipe.time}</p>
+                                <h4 className="font-bold text-base mb-1">{featuredRecipe.name}</h4>
                                 <div className="flex gap-2 mt-3">
-                                    <button className="flex min-w-[40px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-primary text-[#111813] text-sm font-bold leading-normal tracking-[0.015em] gap-2">Thêm</button>
-                                    <button className="flex min-w-[40px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-[#f0f4f2] dark:bg-white/10 dark:text-white/90 text-[#111813] text-sm font-bold leading-normal tracking-[0.015em] gap-2">Xem chi tiết</button>
+                                    <button 
+                                        onClick={() => addMeal(featuredMealKey, selectedDate)}
+                                        className="px-4 py-1.5 bg-primary text-xs font-bold rounded-full text-[#111813] hover:bg-primary-dark hover:text-white transition-colors"
+                                    >
+                                        Thêm
+                                    </button>
+                                    <button 
+                                        onClick={() => onViewRecipe(featuredMealKey)}
+                                        className="px-4 py-1.5 bg-gray-100 text-xs font-bold rounded-full text-[#111813] hover:bg-gray-200 transition-colors"
+                                    >
+                                        Xem chi tiết
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                )}
+
+                <div className="px-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-[#111813]">Danh sách mua sắm ({selectedDate.getDate()}/{selectedDate.getMonth() + 1})</h3>
+                            <p className="text-xs text-gray-500">
+                                Tổng ({totalPeople} người): <span className="font-bold text-[#111813]">{formatMoney(cartTotal)}</span>
+                            </p>
+                        </div>
+                    </div>
+                    {hasShoppingItems ? (
+                        <div className="space-y-6">
+                            {shoppingListKeys.map((category) => (
+                                <div key={category} className="animate-fade-in">
+                                    <h4 className="font-bold text-gray-500 text-xs uppercase mb-3 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-lg">{CATEGORY_ICONS[category] || 'shopping_basket'}</span>
+                                        {category}
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {shoppingList[category].map((item, idx) => (
+                                            <label key={`${category}-${idx}`} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox" className="size-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                                                <div className="flex-1">
+                                                    <p className="font-bold text-[#111813] text-sm">{item.name}</p>
+                                                    <p className="text-xs text-gray-500">{item.qtyDisplay}</p>
+                                                </div>
+                                                <span className="text-sm font-medium text-gray-600">~ {item.priceDisplay}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+
+                            <button 
+                                onClick={handleCheckoutClick}
+                                className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4 bg-[#111813] text-white hover:bg-gray-900 shadow-lg shadow-black/20`}
+                            >
+                                <span className="material-symbols-outlined">shopping_cart_checkout</span>
+                                Hoàn tất mua sắm ({formatMoney(cartTotal)})
+                            </button>
+                        </div>
+                    ) : (
+                         <div className="p-6 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl">
+                             {cartTotal === 0 ? "Đã mua sắm xong hoặc chưa có món nào." : "Trống"}
+                         </div>
+                    )}
                 </div>
 
-                <div className="px-4 pt-4">
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-bold text-[#111813] dark:text-white/90">Danh sách mua sắm</h3>
-                        <a className="text-primary font-bold text-sm">Xem tất cả</a>
-                    </div>
-                    <div className="mt-4 flex flex-col gap-3">
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-white/5">
-                            <div className="flex items-center gap-3">
-                                <input type="checkbox" className="size-5 rounded border-gray-300 text-primary focus:ring-primary" />
-                                <div>
-                                    <p className="font-bold text-[#111813] dark:text-white/90">Thịt bò</p>
-                                    <p className="text-sm text-gray-500 dark:text-white/60">500g</p>
-                                </div>
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-white/70">~ 125.000₫</p>
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-white/5">
-                            <div className="flex items-center gap-3">
-                                <input type="checkbox" className="size-5 rounded border-gray-300 text-primary focus:ring-primary" />
-                                <div>
-                                    <p className="font-bold text-[#111813] dark:text-white/90">Bánh phở</p>
-                                    <p className="text-sm text-gray-500 dark:text-white/60">1kg</p>
-                                </div>
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-white/70">~ 25.000₫</p>
-                        </div>
-                    </div>
-                </div>
             </main>
 
-            <nav className="fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm border-t border-black/10 dark:border-white/10 flex justify-around items-center px-4">
-                <a className="flex flex-col items-center gap-1 text-gray-500 dark:text-white/60">
-                    <span className="material-symbols-outlined">dashboard</span>
-                    <span className="text-xs">Bảng điều khiển</span>
-                </a>
-                <a className="flex flex-col items-center gap-1 text-gray-500 dark:text-white/60">
-                    <span className="material-symbols-outlined">account_balance_wallet</span>
-                    <span className="text-xs">Ngân sách</span>
-                </a>
-                <a className="flex flex-col items-center gap-1 text-primary">
-                    <span className="material-symbols-outlined">restaurant_menu</span>
-                    <span className="text-xs font-bold">Bữa ăn</span>
-                </a>
-                <a className="flex flex-col items-center gap-1 text-gray-500 dark:text-white/60">
-                    <span className="material-symbols-outlined">bar_chart</span>
-                    <span className="text-xs">Báo cáo</span>
-                </a>
-            </nav>
+            {showDayModal && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowDayModal(false)}></div>
+                    <div className="bg-background-light w-full max-w-md rounded-t-3xl p-6 pb-10 animate-slide-up shadow-2xl relative z-10 max-h-[80vh] overflow-y-auto">
+                        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
+                        {renderMealList(selectedDate)}
+                    </div>
+                </div>
+            )}
+
+            {showCheckoutConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowCheckoutConfirm(false)}></div>
+                    <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-scale-up shadow-2xl relative z-20">
+                         <h3 className="text-xl font-bold text-[#111813] mb-2">Xác nhận thanh toán</h3>
+                         <p className="text-gray-500 text-sm mb-6">
+                             Bạn có chắc chắn muốn thanh toán <strong className="text-black">{formatMoney(cartTotal)}</strong> cho các nguyên liệu ngày {selectedDate.getDate()}/{selectedDate.getMonth() + 1}?
+                         </p>
+                         <div className="flex gap-3">
+                             <button 
+                                onClick={() => setShowCheckoutConfirm(false)}
+                                className="flex-1 py-3 rounded-xl font-bold bg-gray-100 text-gray-700 hover:bg-gray-200"
+                             >
+                                 Hủy
+                             </button>
+                             <button 
+                                onClick={confirmCheckout}
+                                className="flex-1 py-3 rounded-xl font-bold bg-primary text-[#111813] hover:bg-primary-dark hover:text-white"
+                             >
+                                 Xác nhận
+                             </button>
+                         </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

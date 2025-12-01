@@ -5,252 +5,165 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ onLogin }) => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    // Simulate auth process
-    setTimeout(() => {
-      onLogin();
-      setLoading(false);
-    }, 500);
-  };
+  // SVG Icons
+  const UserIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  );
+
+  const MailIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  );
+
+  const LockIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    </svg>
+  );
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#221910] dark:bg-background-dark text-white font-display">
-      {/* Login View */}
-      {isLogin ? (
-        <div className="relative flex h-auto min-h-screen w-full flex-col items-center p-4">
-          <div className="w-full max-w-md mx-auto flex flex-col justify-center flex-grow">
-            {/* App Logo */}
-            <div className="flex justify-center pt-8 pb-10">
-              <div className="h-16 w-16 bg-[#ee8c2b] rounded-2xl flex items-center justify-center text-[#221910]">
-                <span className="material-symbols-outlined text-4xl">local_mall</span>
-              </div>
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative font-sans overflow-hidden">
+      
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[120px]"></div>
+      </div>
+
+      <div className="w-full max-w-md z-10 relative">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 mb-4 transform rotate-3">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                 </svg>
             </div>
+            <h1 className="text-3xl font-bold text-white mb-2 font-display">
+                {isRegister ? 'Tạo Tài Khoản' : 'Chào mừng trở lại'}
+            </h1>
+            <p className="text-zinc-400 text-sm">
+                {isRegister ? 'Quản lý tài chính & bữa ăn cho gia đình bạn' : 'Đăng nhập để tiếp tục hành trình'}
+            </p>
+        </div>
 
-            {/* Headline and Body Text */}
-            <div className="w-full text-center mb-8">
-              <h1 className="text-zinc-900 dark:text-white tracking-tight text-3xl font-bold leading-tight">Đăng nhập</h1>
-              <p className="text-zinc-600 dark:text-zinc-400 text-base font-normal leading-normal pt-2">
-                Quản lý chi tiêu và bữa ăn thông minh cho gia đình bạn
-              </p>
-            </div>
+        {/* Card */}
+        <div className="bg-zinc-900 border border-zinc-800 p-6 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-sm">
+            <div className="space-y-5">
+                
+                {isRegister && (
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-500 ml-1 uppercase tracking-wider">Tên của bạn</label>
+                        <div className="relative group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                                <UserIcon />
+                            </div>
+                            <input 
+                                type="text" 
+                                placeholder="Nhập tên"
+                                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                            />
+                        </div>
+                    </div>
+                )}
 
-            {/* Input Fields */}
-            <form onSubmit={handleSubmit} className="w-full space-y-4">
-              <label className="flex flex-col w-full">
-                <p className="text-zinc-800 dark:text-white text-base font-medium leading-normal pb-2">Email hoặc Tên đăng nhập</p>
-                <div className="relative flex w-full items-center">
-                  <span className="material-symbols-outlined absolute left-4 text-zinc-500 dark:text-zinc-400">person</span>
-                  <input
-                    type="text"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-zinc-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#ee8c2b]/50 border border-zinc-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] focus:border-[#ee8c2b] h-14 placeholder:text-zinc-400 dark:placeholder:text-[#b9ab9d] pl-12 pr-4 text-base font-normal leading-normal"
-                    placeholder="Nhập email của bạn"
-                  />
+                <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-500 ml-1 uppercase tracking-wider">Email</label>
+                    <div className="relative group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                            <MailIcon />
+                        </div>
+                        <input 
+                            type="email" 
+                            placeholder="name@example.com"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                        />
+                    </div>
                 </div>
-              </label>
 
-              <label className="flex flex-col w-full">
-                <p className="text-zinc-800 dark:text-white text-base font-medium leading-normal pb-2">Mật khẩu</p>
-                <div className="relative flex w-full items-center">
-                  <span className="material-symbols-outlined absolute left-4 text-zinc-500 dark:text-zinc-400">lock</span>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-zinc-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#ee8c2b]/50 border border-zinc-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] focus:border-[#ee8c2b] h-14 placeholder:text-zinc-400 dark:placeholder:text-[#b9ab9d] pl-12 pr-12 text-base font-normal leading-normal"
-                    placeholder="Nhập mật khẩu của bạn"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 text-zinc-500 dark:text-zinc-400"
-                  >
-                    <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
-                  </button>
+                <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-500 ml-1 uppercase tracking-wider">Mật khẩu</label>
+                    <div className="relative group">
+                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                            <LockIcon />
+                        </div>
+                        <input 
+                            type="password" 
+                            placeholder="••••••••"
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                        />
+                    </div>
                 </div>
-              </label>
 
-              {/* Forgot Password */}
-              <div className="w-full text-right mt-4">
-                <a href="#" className="text-[#ee8c2b] text-sm font-medium leading-normal underline">Quên mật khẩu?</a>
-              </div>
+                {isRegister && (
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-500 ml-1 uppercase tracking-wider">Xác nhận mật khẩu</label>
+                        <div className="relative group">
+                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                                <LockIcon />
+                            </div>
+                            <input 
+                                type="password" 
+                                placeholder="••••••••"
+                                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                            />
+                        </div>
+                    </div>
+                )}
 
-              {/* CTA Button */}
-              <div className="w-full mt-6">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-14 rounded-xl bg-[#ee8c2b] text-[#221910] text-base font-bold leading-normal flex items-center justify-center hover:bg-opacity-90 disabled:opacity-50"
+                <button 
+                    onClick={onLogin}
+                    className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-600/20 transition-all transform active:scale-[0.98] mt-4 flex items-center justify-center gap-2"
                 >
-                  {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+                    {isRegister ? 'Đăng Ký Ngay' : 'Đăng Nhập'}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                 </button>
-              </div>
-            </form>
 
-            {/* Social Login Separator */}
-            <div className="flex items-center w-full gap-4 my-8">
-              <hr className="flex-grow border-t border-zinc-200 dark:border-zinc-700" />
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-normal">Hoặc đăng nhập với</p>
-              <hr className="flex-grow border-t border-zinc-200 dark:border-zinc-700" />
-            </div>
+                {/* Divider */}
+                <div className="flex items-center gap-4 py-2">
+                    <div className="h-px bg-zinc-800 flex-1"></div>
+                    <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Hoặc</span>
+                    <div className="h-px bg-zinc-800 flex-1"></div>
+                </div>
 
-            {/* Social Login Buttons */}
-            <div className="flex w-full justify-center items-center gap-4">
-              <button className="flex h-14 w-14 items-center justify-center rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-transparent hover:bg-gray-50">
-                <svg className="h-6 w-6" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 c0-3.331,2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.461,2.268,15.365,1.484,12.967,1.484 c-6.211,0-11.25,5.039-11.25,11.25c0,6.211,5.039,11.25,11.25,11.25c6.211,0,11.25-5.039,11.25-11.25 C23.967,11.297,23.722,10.932,12.545,10.239z"/>
-                </svg>
-              </button>
-              <button className="flex h-14 w-14 items-center justify-center rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-transparent hover:bg-gray-50">
-                <svg className="h-6 w-6 dark:invert" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M17.05 20.28c-5.07 2.61-10.84 1.04-13.46-4.02-2.61-5.07-1.04-10.84 4.02-13.46 5.07-2.61 10.84-1.04 13.46 4.02 2.61 5.07 1.04 10.84-4.02 13.46M14.5 9.5L13 12l1.5 2.5H12l-1.5-2.5 1.5-2.5z"/>
-                </svg>
-              </button>
-              <button className="flex h-14 w-14 items-center justify-center rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-transparent hover:bg-gray-50">
-                <svg className="h-6 w-6" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5m-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11m3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
-                </svg>
-              </button>
-            </div>
+                {/* Social Login */}
+                <div className="flex justify-center gap-4">
+                    <button 
+                        onClick={onLogin}
+                        className="h-12 flex-1 bg-zinc-800 rounded-xl border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center justify-center hover:border-zinc-600 active:scale-95"
+                    >
+                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5 opacity-80" alt="Google" />
+                    </button>
+                    <button 
+                        onClick={onLogin}
+                        className="h-12 flex-1 bg-zinc-800 rounded-xl border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center justify-center hover:border-zinc-600 active:scale-95"
+                    >
+                        <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" className="w-5 h-5 opacity-80" alt="Facebook" />
+                    </button>
+                </div>
 
-            {/* Sign Up Link */}
-            <div className="w-full text-center py-8">
-              <p className="text-zinc-600 dark:text-zinc-400 text-base">
-                Chưa có tài khoản? <button onClick={() => setIsLogin(false)} className="font-bold text-[#ee8c2b] hover:underline">Đăng ký ngay</button>
-              </p>
+                <div className="text-center mt-6">
+                    <p className="text-zinc-500 text-sm">
+                        {isRegister ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}
+                        <button 
+                            onClick={() => setIsRegister(!isRegister)}
+                            className="text-orange-500 font-bold ml-1.5 hover:text-orange-400 transition-colors"
+                        >
+                            {isRegister ? 'Đăng nhập' : 'Đăng ký ngay'}
+                        </button>
+                    </p>
+                </div>
             </div>
-          </div>
         </div>
-      ) : (
-        /* Signup View */
-        <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-[#221910] group/design-root overflow-x-hidden">
-          <div className="flex flex-col w-full grow">
-            <h1 className="text-slate-900 dark:text-white tracking-tight text-[32px] font-bold leading-tight px-4 text-left pb-3 pt-6 font-display">Tạo Tài Khoản</h1>
-            <div className="flex flex-col gap-4 px-4 py-3">
-              <label className="flex flex-col min-w-40 flex-1">
-                <p className="text-slate-800 dark:text-white text-base font-medium leading-normal pb-2 font-display">Tên người dùng</p>
-                <div className="flex w-full flex-1 items-stretch rounded-xl">
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] focus:border-[#ee8c2b] dark:focus:border-[#ee8c2b] h-14 placeholder:text-slate-400 dark:placeholder:text-[#b9ab9d] p-[15px] rounded-r-none border-r-0 pr-2 text-base font-normal leading-normal font-display"
-                    placeholder="Nhập tên của bạn"
-                  />
-                  <div className="text-slate-500 dark:text-[#b9ab9d] flex border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] items-center justify-center pr-[15px] rounded-r-xl border-l-0">
-                    <span className="material-symbols-outlined">person</span>
-                  </div>
-                </div>
-              </label>
 
-              <label className="flex flex-col min-w-40 flex-1">
-                <p className="text-slate-800 dark:text-white text-base font-medium leading-normal pb-2 font-display">Email</p>
-                <div className="flex w-full flex-1 items-stretch rounded-xl">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] focus:border-[#ee8c2b] dark:focus:border-[#ee8c2b] h-14 placeholder:text-slate-400 dark:placeholder:text-[#b9ab9d] p-[15px] rounded-r-none border-r-0 pr-2 text-base font-normal leading-normal font-display"
-                    placeholder="Nhập email của bạn"
-                  />
-                  <div className="text-slate-500 dark:text-[#b9ab9d] flex border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] items-center justify-center pr-[15px] rounded-r-xl border-l-0">
-                    <span className="material-symbols-outlined">mail</span>
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex flex-col min-w-40 flex-1">
-                <p className="text-slate-800 dark:text-white text-base font-medium leading-normal pb-2 font-display">Mật khẩu</p>
-                <div className="flex w-full flex-1 items-stretch rounded-xl">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] focus:border-[#ee8c2b] dark:focus:border-[#ee8c2b] h-14 placeholder:text-slate-400 dark:placeholder:text-[#b9ab9d] p-[15px] rounded-r-none border-r-0 pr-2 text-base font-normal leading-normal font-display"
-                    placeholder="Tạo mật khẩu"
-                  />
-                  <div className="text-slate-500 dark:text-[#b9ab9d] flex border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] items-center justify-center pr-[15px] rounded-r-xl border-l-0">
-                    <span className="material-symbols-outlined">lock</span>
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex flex-col min-w-40 flex-1">
-                <p className="text-slate-800 dark:text-white text-base font-medium leading-normal pb-2 font-display">Xác nhận mật khẩu</p>
-                <div className="flex w-full flex-1 items-stretch rounded-xl">
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] focus:border-[#ee8c2b] dark:focus:border-[#ee8c2b] h-14 placeholder:text-slate-400 dark:placeholder:text-[#b9ab9d] p-[15px] rounded-r-none border-r-0 pr-2 text-base font-normal leading-normal font-display"
-                    placeholder="Xác nhận mật khẩu"
-                  />
-                  <div className="text-slate-500 dark:text-[#b9ab9d] flex border border-slate-300 dark:border-[#54473b] bg-white dark:bg-[#27211c] items-center justify-center pr-[15px] rounded-r-xl border-l-0">
-                    <span className="material-symbols-outlined">lock</span>
-                  </div>
-                </div>
-              </label>
-            </div>
-
-            <div className="flex flex-col gap-4 px-4 py-6">
-              <button
-                onClick={handleSubmit}
-                className="flex items-center justify-center font-bold text-white text-base h-14 w-full rounded-xl bg-[#ee8c2b] hover:bg-opacity-90 transition-colors font-display"
-              >
-                Đăng ký
-              </button>
-            </div>
-
-            <div className="flex flex-col items-center gap-4 px-4 pb-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-normal font-display">Hoặc tiếp tục với</p>
-              <div className="flex w-full items-center justify-center gap-4">
-                <button className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50">
-                  <svg className="h-6 w-6" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 c0-3.331,2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.461,2.268,15.365,1.484,12.967,1.484 c-6.211,0-11.25,5.039-11.25,11.25c0,6.211,5.039,11.25,11.25,11.25c6.211,0,11.25-5.039,11.25-11.25 C23.967,11.297,23.722,10.932,12.545,10.239z"/>
-                  </svg>
-                </button>
-                <button className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50">
-                  <svg className="h-6 w-6 dark:invert" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M17.05 20.28c-5.07 2.61-10.84 1.04-13.46-4.02-2.61-5.07-1.04-10.84 4.02-13.46 5.07-2.61 10.84-1.04 13.46 4.02 2.61 5.07 1.04 10.84-4.02 13.46M14.5 9.5L13 12l1.5 2.5H12l-1.5-2.5 1.5-2.5z"/>
-                  </svg>
-                </button>
-                <button className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50">
-                  <svg className="h-6 w-6" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5m-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11m3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className="px-4 py-4 text-center">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-normal font-display">
-                Bằng cách đăng ký, bạn đồng ý với
-                <a className="font-medium text-[#ee8c2b] hover:underline" href="#"> Điều khoản Dịch vụ</a> và
-                <a className="font-medium text-[#ee8c2b] hover:underline" href="#"> Chính sách Bảo mật</a> của chúng tôi.
-              </p>
-            </div>
-
-            <div className="px-4 pt-2 pb-8 text-center">
-              <p className="text-slate-500 dark:text-slate-400 text-base font-normal font-display">
-                Đã có tài khoản?
-                <button onClick={() => setIsLogin(true)} className="font-bold text-[#ee8c2b] hover:underline ml-1">Đăng nhập</button>
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

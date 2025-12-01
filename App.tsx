@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import { Screen, UserProfile, BudgetData, Transaction, PlannedMeal } from './types';
-import { calculateInitialBudget } from './services/geminiService';
+import { Screen, UserProfile, BudgetData, Transaction, PlannedMeal, Recipe } from './types';
+import { calculateInitialBudget, RECIPES_DB } from './services/geminiService';
 import Auth from './components/Auth';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
@@ -8,6 +9,7 @@ import BudgetPlan from './components/BudgetPlan';
 import MealPlanner from './components/MealPlanner';
 import Reports from './components/Reports';
 import Layout from './components/Layout';
+import RecipeDetailModal from './components/RecipeDetailModal';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.AUTH);
@@ -16,59 +18,44 @@ const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [plannedMeals, setPlannedMeals] = useState<Record<string, PlannedMeal[]>>({});
   const [isInitialized, setIsInitialized] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   // Helper to get total family members
   const totalPeople = user ? (user.familyMembers.adults + user.familyMembers.kids) : 1;
 
   // 1. Load Data from LocalStorage on Mount
   useEffect(() => {
-    try {
-        const savedUser = localStorage.getItem('famplan_user');
-        const savedBudget = localStorage.getItem('famplan_budget');
-        const savedTransactions = localStorage.getItem('famplan_transactions');
-        const savedMeals = localStorage.getItem('famplan_meals');
+    const savedUser = localStorage.getItem('famplan_user');
+    const savedBudget = localStorage.getItem('famplan_budget');
+    const savedTransactions = localStorage.getItem('famplan_transactions');
+    const savedMeals = localStorage.getItem('famplan_meals');
 
-        if (savedUser && savedBudget) {
-            setUser(JSON.parse(savedUser));
-            setBudget(JSON.parse(savedBudget));
-            
-            if (savedTransactions) {
-                try {
-                    const parsedTx = JSON.parse(savedTransactions).map((t: any) => ({
-                        ...t,
-                        date: new Date(t.date)
-                    }));
-                    setTransactions(parsedTx);
-                } catch (e) {
-                    console.error("Error parsing transactions", e);
-                    setTransactions([]);
-                }
+    if (savedUser && savedBudget) {
+      setUser(JSON.parse(savedUser));
+      setBudget(JSON.parse(savedBudget));
+      if (savedTransactions) {
+        const parsedTx = JSON.parse(savedTransactions).map((t: any) => ({
+            ...t,
+            date: new Date(t.date)
+        }));
+        setTransactions(parsedTx);
+      }
+      if (savedMeals) {
+        try {
+            const parsed = JSON.parse(savedMeals);
+            const sampleKey = Object.keys(parsed)[0];
+            if (sampleKey && parsed[sampleKey].length > 0 && typeof parsed[sampleKey][0] === 'string') {
+                setPlannedMeals({});
+            } else {
+                setPlannedMeals(parsed);
             }
-            
-            if (savedMeals) {
-                try {
-                    const parsed = JSON.parse(savedMeals);
-                    // Basic validation to check structure
-                    const sampleKey = Object.keys(parsed)[0];
-                    if (sampleKey && parsed[sampleKey].length > 0 && typeof parsed[sampleKey][0] === 'string') {
-                        setPlannedMeals({}); // Reset if old format
-                    } else {
-                        setPlannedMeals(parsed);
-                    }
-                } catch (e) {
-                    console.error("Error parsing meals", e);
-                    setPlannedMeals({});
-                }
-            }
-            setCurrentScreen(Screen.DASHBOARD);
+        } catch (e) {
+            setPlannedMeals({});
         }
-    } catch (error) {
-        console.error("Critical error loading local storage:", error);
-        // Fallback to safe state
-        localStorage.clear();
-    } finally {
-        setIsInitialized(true);
+      }
+      setCurrentScreen(Screen.DASHBOARD);
     }
+    setIsInitialized(true);
   }, []);
 
   // 2. Save Data to LocalStorage on Change
@@ -90,13 +77,6 @@ const App: React.FC = () => {
       loadBudget();
     }
   }, [user, budget, isInitialized]);
-
-  const getDaysRemainingInMonth = () => {
-    const now = new Date();
-    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const daysLeft = lastDayOfMonth.getDate() - now.getDate();
-    return Math.max(1, daysLeft);
-  };
 
   const addTransaction = (newTx: Omit<Transaction, 'id'>) => {
     if (!budget) return;
@@ -123,14 +103,15 @@ const App: React.FC = () => {
         const newTotalSpent = prevBudget.spent + amount;
         const newRemaining = prevBudget.monthlyLimit - newTotalSpent;
 
-        const daysRemaining = getDaysRemainingInMonth();
-        const newDailyBudget = Math.max(0, Math.round(newRemaining / daysRemaining));
+        // FIX: Không tính lại dailyLimit dựa trên số tiền còn lại mỗi khi giao dịch
+        // Giữ nguyên dailyLimit gốc để phép tính (Hạn mức - Đã chi) hiển thị đúng logic người dùng mong đợi.
+        // Ví dụ: Có 50k, tiêu 24k -> Còn lại hiển thị là 26k (thay vì bị chia trung bình lại).
 
         return {
             ...prevBudget,
             spent: newTotalSpent,
             remaining: newRemaining,
-            dailyLimit: newDailyBudget,
+            dailyLimit: prevBudget.dailyLimit, // Giữ nguyên, không thay đổi
             categoryBreakdown: updatedCategories
         };
     });
@@ -190,6 +171,13 @@ const App: React.FC = () => {
       }
   };
 
+  const handleViewRecipe = (recipeId: string) => {
+      const recipe = RECIPES_DB[recipeId];
+      if (recipe) {
+          setSelectedRecipe(recipe);
+      }
+  };
+
   if (!isInitialized) return null;
 
   const renderScreen = () => {
@@ -211,6 +199,7 @@ const App: React.FC = () => {
                     onNavigate={setCurrentScreen}
                     onReset={handleReset}
                     onToggleMealStatus={handleToggleMealStatus}
+                    onViewRecipe={handleViewRecipe}
                     totalPeople={totalPeople}
                 />
              ) : <div>Loading...</div>}
@@ -231,6 +220,7 @@ const App: React.FC = () => {
                     onUpdatePlannedMeals={setPlannedMeals}
                     dailyLimit={budget ? budget.dailyLimit : 0}
                     onMarkAsShopped={handleMarkAsShopped}
+                    onViewRecipe={handleViewRecipe}
                     totalPeople={totalPeople}
                 />
             </Layout>
@@ -256,6 +246,7 @@ const App: React.FC = () => {
                         onNavigate={setCurrentScreen}
                         onReset={handleReset}
                         onToggleMealStatus={handleToggleMealStatus}
+                        onViewRecipe={handleViewRecipe}
                         totalPeople={totalPeople}
                     />
                  ) : <div>Loading...</div>}
@@ -267,6 +258,12 @@ const App: React.FC = () => {
   return (
     <>
       {renderScreen()}
+      {selectedRecipe && (
+          <RecipeDetailModal 
+            recipe={selectedRecipe} 
+            onClose={() => setSelectedRecipe(null)} 
+          />
+      )}
     </>
   );
 };
