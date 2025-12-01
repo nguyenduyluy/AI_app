@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Transaction, Recipe, PlannedMeal } from '../types';
-import { RECIPES_DB, suggestSingleMeal, generateStrictMealPlan } from '../services/geminiService';
+import { RECIPES_DB, suggestSingleMeal } from '../services/geminiService';
 
 const CATEGORY_ICONS: Record<string, string> = {
     'Thịt & Hải sản': 'set_meal',
@@ -11,7 +11,6 @@ const CATEGORY_ICONS: Record<string, string> = {
     'Khác': 'shopping_basket'
 };
 
-// Helper function outside component for initialization usage
 const formatDateKey = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -24,15 +23,14 @@ interface MealPlannerProps {
     plannedMeals: Record<string, PlannedMeal[]>;
     onUpdatePlannedMeals: (meals: Record<string, PlannedMeal[]>) => void;
     dailyLimit: number;
+    onMarkAsShopped: (startDate: Date, endDate: Date) => void;
+    totalPeople: number;
 }
 
-const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeals, onUpdatePlannedMeals, dailyLimit }) => {
+const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeals, onUpdatePlannedMeals, dailyLimit, onMarkAsShopped, totalPeople = 1 }) => {
     const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
-    
-    // TABBED NAVIGATION STATE
     const [activeTab, setActiveTab] = useState<'breakfast' | 'lunch' | 'dinner'>('breakfast');
 
-    // Initialize with Real Time (Today)
     const [selectedDate, setSelectedDate] = useState<Date>(new Date()); 
     const [displayMonth, setDisplayMonth] = useState<Date>(() => {
         const now = new Date();
@@ -40,7 +38,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
     });
     
     const [showDayModal, setShowDayModal] = useState(false);
-    const [hasCheckedOut, setHasCheckedOut] = useState(false);
+    const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
     const [isSuggesting, setIsSuggesting] = useState(false);
 
     const isSameDay = (d1: Date, d2: Date) => {
@@ -53,8 +51,9 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
+    // SCALE COST BY FAMILY SIZE
     const calculateRecipeCost = (recipe: Recipe) => {
-        return recipe.ingredients.reduce((sum, ing) => sum + ing.price, 0);
+        return recipe.ingredients.reduce((sum, ing) => sum + ing.price, 0) * totalPeople;
     };
 
     const addMeal = (recipeId: string, dateObj: Date) => {
@@ -62,15 +61,15 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
         const newMeal: PlannedMeal = {
             instanceId: Math.random().toString(36).substr(2, 9),
             recipeId: recipeId,
-            status: 'pending'
+            status: 'pending',
+            isShopped: false
         };
 
         const existing = plannedMeals[key] || [];
-        // Only add if not already present for this exact meal type to avoid duplicates in the same slot
         const recipe = RECIPES_DB[recipeId];
-        const isTypePresent = existing.some(m => RECIPES_DB[m.recipeId].type === recipe.type);
+        const isTypePresent = existing.some(m => RECIPES_DB[m.recipeId]?.type === recipe?.type);
         
-        if (!isTypePresent) {
+        if (!isTypePresent && recipe) {
             onUpdatePlannedMeals({
                 ...plannedMeals,
                 [key]: [...existing, newMeal]
@@ -79,15 +78,31 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
     };
 
     const handleSuggestSingleMeal = async (type: 'Bữa sáng' | 'Bữa trưa' | 'Bữa tối') => {
-        setIsSuggesting(true);
-        // Distribution Logic: 20% Morning, 40% Noon, 40% Evening
+        // Calculate remaining budget for this meal slot
         const ratio = type === 'Bữa sáng' ? 0.2 : 0.4;
-        const budgetForMeal = dailyLimit * ratio;
+        const maxBudgetForMeal = dailyLimit * ratio;
 
-        const recipeId = await suggestSingleMeal(type, budgetForMeal);
+        const currentKey = formatDateKey(selectedDate);
+        const currentMeals = plannedMeals[currentKey] || [];
+        const currentTotal = currentMeals.reduce((sum, m) => {
+             const r = RECIPES_DB[m.recipeId];
+             return sum + (r ? calculateRecipeCost(r) : 0);
+        }, 0);
+
+        if (currentTotal > dailyLimit * 0.95) {
+             alert(`Ngân sách ngày hôm nay (${formatMoney(dailyLimit)}) đã gần hết. Không thể thêm món mới.`);
+             return;
+        }
+
+        setIsSuggesting(true);
+        
+        // Pass totalPeople to service so it can filter recipes based on per-person cost
+        const recipeId = await suggestSingleMeal(type, maxBudgetForMeal, totalPeople, true);
         
         if (recipeId) {
             addMeal(recipeId, selectedDate);
+        } else {
+            alert(`Không tìm thấy món ${type} nào phù hợp với ngân sách còn lại (${formatMoney(maxBudgetForMeal)}) cho ${totalPeople} người.`);
         }
         setIsSuggesting(false);
     };
@@ -118,27 +133,35 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
 
     const shoppingList = useMemo(() => {
         const list: Record<string, { qty: number, unit: string, price: number, category: string }> = {};
-        
-        currentWeekRange.forEach(d => {
-            const meals = plannedMeals[d.key];
-            if (meals) {
-                meals.forEach(meal => {
-                    const recipe = RECIPES_DB[meal.recipeId];
-                    if (recipe) {
-                        recipe.ingredients.forEach(ing => {
-                            if (list[ing.name]) {
-                                list[ing.name].qty += ing.qty;
-                                list[ing.name].price += ing.price;
-                            } else {
-                                list[ing.name] = { ...ing };
-                            }
-                        });
-                    }
-                });
-            }
-        });
+        const key = formatDateKey(selectedDate);
+        const meals = plannedMeals[key];
 
-        // Group items by category
+        if (meals) {
+            meals.forEach(meal => {
+                if (meal.isShopped) return; 
+
+                const recipe = RECIPES_DB[meal.recipeId];
+                if (recipe) {
+                    recipe.ingredients.forEach(ing => {
+                        // Scale quantity and price by totalPeople
+                        const scaledQty = ing.qty * totalPeople;
+                        const scaledPrice = ing.price * totalPeople;
+
+                        if (list[ing.name]) {
+                            list[ing.name].qty += scaledQty;
+                            list[ing.name].price += scaledPrice;
+                        } else {
+                            list[ing.name] = { 
+                                ...ing,
+                                qty: scaledQty,
+                                price: scaledPrice
+                            };
+                        }
+                    });
+                }
+            });
+        }
+
         const grouped: Record<string, Array<{ name: string, qtyDisplay: string, priceDisplay: string }>> = {};
 
         Object.entries(list)
@@ -157,7 +180,7 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
             });
 
         return grouped;
-    }, [plannedMeals, currentWeekRange]);
+    }, [plannedMeals, selectedDate, totalPeople]);
 
     const getDailyCost = (date: Date) => {
         const key = formatDateKey(date);
@@ -169,35 +192,40 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
         return formatMoney(total);
     };
 
-    const weeklyTotalNum = useMemo(() => {
+    const cartTotal = useMemo(() => {
         let total = 0;
-        currentWeekRange.forEach(d => {
-            const meals = plannedMeals[d.key] || [];
-            meals.forEach(meal => {
-                const recipe = RECIPES_DB[meal.recipeId];
-                if (recipe) total += calculateRecipeCost(recipe);
-            });
-        });
-        return total;
-    }, [plannedMeals, currentWeekRange]);
-
-    const weeklyCost = formatMoney(weeklyTotalNum);
-
-    const handleCheckout = () => {
-        if (!onAddTransaction || weeklyTotalNum === 0) return;
+        const key = formatDateKey(selectedDate);
+        const meals = plannedMeals[key] || [];
         
+        meals.forEach(meal => {
+            if (meal.isShopped) return;
+            const recipe = RECIPES_DB[meal.recipeId];
+            if (recipe) total += calculateRecipeCost(recipe);
+        });
+        
+        return total;
+    }, [plannedMeals, selectedDate, totalPeople]);
+
+    const handleCheckoutClick = () => {
+        if (!onAddTransaction || cartTotal === 0) return;
+        setShowCheckoutConfirm(true);
+    };
+
+    const confirmCheckout = () => {
+        if (!onAddTransaction) return;
+
         onAddTransaction({
-            amount: weeklyTotalNum,
-            merchant: 'Đi chợ tuần này',
-            categoryId: 'groceries', // Matches ID in geminiService
+            amount: cartTotal,
+            merchant: `Đi chợ (${selectedDate.getDate()}/${selectedDate.getMonth() + 1})`,
+            categoryId: 'groceries',
             categoryName: 'Hàng tạp hóa',
             date: new Date(),
             icon: 'shopping_cart',
             color: 'bg-green-100'
         });
-        
-        setHasCheckedOut(true);
-        setTimeout(() => setHasCheckedOut(false), 3000); // Reset feedback after 3s
+
+        onMarkAsShopped(selectedDate, selectedDate);
+        setShowCheckoutConfirm(false);
     };
 
     const nextMonth = () => {
@@ -261,13 +289,11 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
     const displayMonthLabel = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(displayMonth);
     const currentWeekNumber = Math.ceil(currentWeekRange[0].dateObj.getDate() / 7); 
     
-    // TABBED RENDER LOGIC
     const renderMealList = (date: Date) => {
         const key = formatDateKey(date);
         const meals = plannedMeals[key] || [];
         const dailyCost = getDailyCost(date);
 
-        // Map tab internal keys to Data "Type" strings (must match services/geminiService.ts)
         const tabMap: Record<string, 'Bữa sáng' | 'Bữa trưa' | 'Bữa tối'> = {
             'breakfast': 'Bữa sáng',
             'lunch': 'Bữa trưa',
@@ -276,13 +302,11 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
 
         const targetType = tabMap[activeTab];
         
-        // FIND (Don't Map) the single meal for this slot
         const currentMeal = meals.find(m => {
             const recipe = RECIPES_DB[m.recipeId];
             return recipe && recipe.type === targetType;
         });
 
-        // Resolve Recipe Data
         const recipe = currentMeal ? RECIPES_DB[currentMeal.recipeId] : null;
 
         return (
@@ -291,10 +315,9 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
                     <h3 className="text-lg font-bold text-[#111813]">
                             Bữa ăn ngày {date.getDate()}/{date.getMonth() + 1}
                     </h3>
-                    <p className="text-sm text-gray-500">Ước tính: <span className="font-bold text-gray-900">{dailyCost}</span></p>
+                    <p className="text-sm text-gray-500">Ước tính ({totalPeople} người): <span className="font-bold text-gray-900">{dailyCost}</span></p>
                 </div>
 
-                {/* TAB HEADER */}
                 <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
                     {[
                         { id: 'breakfast', label: 'Sáng' },
@@ -315,7 +338,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
                     ))}
                 </div>
 
-                {/* TAB CONTENT - CONDITIONAL RENDERING */}
                 <div className="min-h-[120px]">
                     {currentMeal && recipe ? (
                         <div className={`flex gap-4 p-3 bg-white rounded-xl border border-gray-100 shadow-sm animate-fade-in transition-all ${currentMeal.status === 'completed' ? 'opacity-60 bg-gray-50' : ''}`}>
@@ -323,7 +345,10 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
                             <div className="flex-1">
                                 <p className="text-xs text-gray-500 font-medium uppercase mb-1">{recipe.type}</p>
                                 <p className={`font-bold text-[#111813] mb-1 text-lg ${currentMeal.status === 'completed' ? 'line-through text-gray-500' : ''}`}>{recipe.name}</p>
-                                <p className={`text-sm font-medium ${currentMeal.status === 'completed' ? 'text-gray-400' : 'text-primary-dark'}`}>{formatMoney(calculateRecipeCost(recipe))}</p>
+                                <p className={`text-sm font-medium ${currentMeal.status === 'completed' ? 'text-gray-400' : 'text-primary-dark'}`}>
+                                    {formatMoney(calculateRecipeCost(recipe))}
+                                    {currentMeal.isShopped && <span className="ml-2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Đã mua</span>}
+                                </p>
                             </div>
                         </div>
                     ) : (
@@ -350,6 +375,8 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
 
     const shoppingListKeys = Object.keys(shoppingList).sort();
     const hasShoppingItems = shoppingListKeys.length > 0;
+    const featuredMealKey = 'dau-sot-ca';
+    const featuredRecipe = RECIPES_DB[featuredMealKey];
 
     return (
         <div className="flex-1 flex flex-col pb-24 bg-background-light animate-fade-in">
@@ -371,7 +398,6 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
             </header>
 
             <main className="flex-col flex gap-6">
-                
                 {viewMode === 'week' ? (
                     <div className="bg-white pb-4 pt-2 border-b border-gray-100 animate-fade-in">
                          <div className="flex items-center justify-center gap-4 mb-4">
@@ -429,45 +455,44 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
                     </div>
                 )}
 
-                {/* Main Meal Content Area (Replaces old list) */}
                 {viewMode === 'week' && (
                     <div className="px-4">
                         {renderMealList(selectedDate)}
                     </div>
                 )}
 
-                {/* Featured Recipe - Kept as a separate section below the main plan */}
-                <div className="px-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-bold text-[#111813]">Món ăn nổi bật</h3>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex gap-4">
-                        <img src={RECIPES_DB['bun-cha'].image} className="size-24 rounded-lg object-cover" alt="Bun Cha" />
-                        <div className="flex-1">
-                            <p className="text-xs text-gray-500 mb-1">{RECIPES_DB['bun-cha'].time}</p>
-                            <h4 className="font-bold text-base mb-1">{RECIPES_DB['bun-cha'].name}</h4>
-                            <div className="flex gap-2 mt-3">
-                                <button 
-                                    onClick={() => addMeal('bun-cha', selectedDate)}
-                                    className="px-4 py-1.5 bg-primary text-xs font-bold rounded-full text-[#111813] hover:bg-primary-dark hover:text-white transition-colors"
-                                >
-                                    Thêm
-                                </button>
-                                <button className="px-4 py-1.5 bg-gray-100 text-xs font-bold rounded-full text-[#111813]">Xem chi tiết</button>
+                {featuredRecipe && (
+                    <div className="px-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-[#111813]">Món ăn nổi bật</h3>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex gap-4">
+                            <img src={featuredRecipe.image} className="size-24 rounded-lg object-cover" alt={featuredRecipe.name} />
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500 mb-1">{featuredRecipe.time}</p>
+                                <h4 className="font-bold text-base mb-1">{featuredRecipe.name}</h4>
+                                <div className="flex gap-2 mt-3">
+                                    <button 
+                                        onClick={() => addMeal(featuredMealKey, selectedDate)}
+                                        className="px-4 py-1.5 bg-primary text-xs font-bold rounded-full text-[#111813] hover:bg-primary-dark hover:text-white transition-colors"
+                                    >
+                                        Thêm
+                                    </button>
+                                    <button className="px-4 py-1.5 bg-gray-100 text-xs font-bold rounded-full text-[#111813]">Xem chi tiết</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 <div className="px-4">
                     <div className="flex justify-between items-center mb-4">
                         <div>
-                            <h3 className="text-lg font-bold text-[#111813]">Danh sách mua sắm</h3>
+                            <h3 className="text-lg font-bold text-[#111813]">Danh sách mua sắm ({selectedDate.getDate()}/{selectedDate.getMonth() + 1})</h3>
                             <p className="text-xs text-gray-500">
-                                Tổng: <span className="font-bold text-[#111813]">{weeklyCost}</span>
+                                Tổng ({totalPeople} người): <span className="font-bold text-[#111813]">{formatMoney(cartTotal)}</span>
                             </p>
                         </div>
-                        <button className="text-primary font-bold text-sm">Xem tất cả</button>
                     </div>
                     {hasShoppingItems ? (
                         <div className="space-y-6">
@@ -493,30 +518,16 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
                             ))}
 
                             <button 
-                                onClick={handleCheckout}
-                                disabled={hasCheckedOut}
-                                className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4 ${
-                                    hasCheckedOut 
-                                    ? 'bg-green-100 text-green-700' 
-                                    : 'bg-[#111813] text-white hover:bg-gray-900 shadow-lg shadow-black/20'
-                                }`}
+                                onClick={handleCheckoutClick}
+                                className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4 bg-[#111813] text-white hover:bg-gray-900 shadow-lg shadow-black/20`}
                             >
-                                {hasCheckedOut ? (
-                                    <>
-                                        <span className="material-symbols-outlined">check_circle</span>
-                                        Đã trừ vào ngân sách
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className="material-symbols-outlined">shopping_cart_checkout</span>
-                                        Hoàn tất mua sắm ({weeklyCost})
-                                    </>
-                                )}
+                                <span className="material-symbols-outlined">shopping_cart_checkout</span>
+                                Hoàn tất mua sắm ({formatMoney(cartTotal)})
                             </button>
                         </div>
                     ) : (
-                         <div className="p-6 text-center text-gray-400">
-                             Chưa có mục nào trong danh sách cho tuần này
+                         <div className="p-6 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl">
+                             {cartTotal === 0 ? "Đã mua sắm xong hoặc chưa có món nào." : "Trống"}
                          </div>
                     )}
                 </div>
@@ -529,6 +540,32 @@ const MealPlanner: React.FC<MealPlannerProps> = ({ onAddTransaction, plannedMeal
                     <div className="bg-background-light w-full max-w-md rounded-t-3xl p-6 pb-10 animate-slide-up shadow-2xl relative z-10 max-h-[80vh] overflow-y-auto">
                         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
                         {renderMealList(selectedDate)}
+                    </div>
+                </div>
+            )}
+
+            {showCheckoutConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowCheckoutConfirm(false)}></div>
+                    <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-scale-up shadow-2xl relative z-20">
+                         <h3 className="text-xl font-bold text-[#111813] mb-2">Xác nhận thanh toán</h3>
+                         <p className="text-gray-500 text-sm mb-6">
+                             Bạn có chắc chắn muốn thanh toán <strong className="text-black">{formatMoney(cartTotal)}</strong> cho các nguyên liệu ngày {selectedDate.getDate()}/{selectedDate.getMonth() + 1}?
+                         </p>
+                         <div className="flex gap-3">
+                             <button 
+                                onClick={() => setShowCheckoutConfirm(false)}
+                                className="flex-1 py-3 rounded-xl font-bold bg-gray-100 text-gray-700 hover:bg-gray-200"
+                             >
+                                 Hủy
+                             </button>
+                             <button 
+                                onClick={confirmCheckout}
+                                className="flex-1 py-3 rounded-xl font-bold bg-primary text-[#111813] hover:bg-primary-dark hover:text-white"
+                             >
+                                 Xác nhận
+                             </button>
+                         </div>
                     </div>
                 </div>
             )}

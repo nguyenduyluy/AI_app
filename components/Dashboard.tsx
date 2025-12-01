@@ -12,13 +12,13 @@ interface DashboardProps {
   onNavigate: (screen: any) => void;
   onReset: () => void;
   onToggleMealStatus: (dateKey: string, instanceId: string) => void;
+  totalPeople: number;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plannedMeals, onAddTransaction, onNavigate, onReset, onToggleMealStatus }) => {
+const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plannedMeals, onAddTransaction, onNavigate, onReset, onToggleMealStatus, totalPeople = 1 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   
-  // Modal State
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
   const [selectedCatId, setSelectedCatId] = useState(budget.categoryBreakdown[0]?.id || 'groceries');
@@ -27,7 +27,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  // --- Calculate Today's Spending Stats ---
   const todayStats = useMemo(() => {
     const today = new Date();
     const spentToday = transactions
@@ -47,10 +46,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
     return { spentToday, remainingToday, percentSpentToday };
   }, [transactions, budget.dailyLimit]);
 
-
-  // --- Meal Plan Logic: Show ALL planned meals, split by Type ---
   const { breakfastMeals, lunchMeals, dinnerMeals } = useMemo(() => {
-    // 1. Flatten all meals from all dates, keeping dateKey and instance info
     const safePlannedMeals = plannedMeals || {};
     const allMeals: Array<Recipe & { instanceId: string, status: 'pending' | 'completed', dateKey: string }> = [];
 
@@ -67,8 +63,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
             }
         });
     });
-
-    // We don't remove duplicates anymore because each meal is an instance with a status
     
     return {
         breakfastMeals: allMeals.filter(m => m.type === 'Bữa sáng'),
@@ -77,7 +71,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
     };
   }, [plannedMeals]);
 
-  const calculateCost = (recipe: Recipe) => recipe.ingredients.reduce((sum, i) => sum + i.price, 0);
+  // Scale cost by family size
+  const calculateCost = (recipe: Recipe) => {
+      return recipe.ingredients.reduce((sum, i) => sum + i.price, 0) * totalPeople;
+  };
 
   const handleSaveTransaction = () => {
     if (!amount || !merchant) return;
@@ -91,7 +88,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
         categoryName: category?.name || 'Khác',
         date: new Date(),
         icon: category?.icon || 'receipt',
-        color: 'bg-gray-100' // Simple default
+        color: 'bg-gray-100'
     });
 
     setAmount('');
@@ -99,7 +96,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
     setShowAddModal(false);
   };
 
-  // Expanded MealCard to support status toggling
   const MealCard: React.FC<{ meal: Recipe & { instanceId: string, status: 'pending' | 'completed', dateKey: string } }> = ({ meal }) => {
     const isCompleted = meal.status === 'completed';
 
@@ -154,7 +150,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
 
   return (
     <div className="flex-1 flex flex-col pb-24 animate-fade-in relative">
-      {/* Header */}
       <header className="flex items-center justify-between p-4 bg-background-light sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
@@ -174,17 +169,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
         </button>
       </header>
 
-      {/* Main Content */}
       <main className="px-4 space-y-6 pt-2">
         
-        {/* Budget Card */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative overflow-hidden">
-            {/* Title */}
             <p className="text-sm text-gray-500 font-medium mb-1">Ngân sách chi tiêu hôm nay</p>
             
-            {/* Big Value & Badge */}
             <div className="flex justify-between items-center mb-4">
-                {/* DISPLAY REMAINING AMOUNT FOR TODAY */}
                 <p className="text-3xl font-bold text-[#111813] tracking-tight">{formatMoney(todayStats.remainingToday)}</p>
                 {todayStats.percentSpentToday > 90 && (
                     <div className="flex items-center gap-1 bg-red-50 text-red-600 px-2 py-1 rounded-full text-xs font-bold">
@@ -194,7 +184,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                 )}
             </div>
             
-            {/* Progress Bar */}
             <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-3">
                 <div 
                     className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full transition-all duration-1000" 
@@ -202,7 +191,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                 ></div>
             </div>
 
-            {/* Bottom Row Info */}
             <div className="flex justify-between text-sm">
                 <span className="text-gray-500">
                     Đã chi <span className="font-bold text-gray-900">{formatMoney(todayStats.spentToday)}</span>
@@ -213,7 +201,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
             </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="flex gap-3">
             <button 
                 onClick={() => setShowAddModal(true)}
@@ -231,14 +218,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
             </button>
         </div>
 
-        {/* Meal Plan Preview - 3 Sections (Breakfast, Lunch, Dinner) */}
         <div className="space-y-4">
              <div className="flex justify-between items-center">
                 <h3 className="font-bold text-lg text-[#111813]">Thực đơn đã lên kế hoạch</h3>
                 <button onClick={() => onNavigate('MEALS')} className="text-primary font-bold text-sm">Quản lý</button>
             </div>
             
-            {/* Breakfast */}
             {breakfastMeals.length > 0 && (
                 <div>
                     <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
@@ -250,7 +235,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                 </div>
             )}
 
-            {/* Lunch */}
             {lunchMeals.length > 0 && (
                 <div>
                     <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
@@ -262,7 +246,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                 </div>
             )}
 
-            {/* Dinner */}
             {dinnerMeals.length > 0 && (
                 <div>
                     <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
@@ -284,7 +267,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
             )}
         </div>
 
-        {/* Transactions List */}
         <div>
              <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg text-[#111813]">Giao dịch gần đây</h3>
@@ -318,7 +300,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
         </div>
       </main>
 
-      {/* Add Transaction Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowAddModal(false)}></div>
@@ -379,12 +360,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
         </div>
       )}
 
-      {/* Recipe Detail Modal */}
       {selectedRecipe && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedRecipe(null)}></div>
             <div className="bg-background-light w-full max-w-md rounded-t-3xl p-0 animate-slide-up shadow-2xl relative z-10 h-[85vh] flex flex-col">
-                {/* Modal Header Image */}
                 <div className="relative h-64 w-full shrink-0">
                     <img src={selectedRecipe.image} className="w-full h-full object-cover rounded-t-3xl" alt={selectedRecipe.name} />
                     <button 
@@ -402,11 +381,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                     </div>
                 </div>
 
-                {/* Modal Body */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     <div>
                         <div className="flex justify-between items-center mb-2">
-                             <h4 className="font-bold text-lg text-[#111813]">Giá ước tính</h4>
+                             <h4 className="font-bold text-lg text-[#111813]">Giá ước tính ({totalPeople} người)</h4>
                              <span className="text-xl font-bold text-primary-dark">{formatMoney(calculateCost(selectedRecipe))}</span>
                         </div>
                         <p className="text-gray-500 text-sm italic">{selectedRecipe.desc || 'Công thức này chưa có mô tả chi tiết.'}</p>
@@ -424,8 +402,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                                         <span className="text-[#111813]">{ing.name}</span>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-gray-500 text-sm mr-2">{ing.qty} {ing.unit}</span>
-                                        <span className="font-bold text-sm text-[#111813]">{formatMoney(ing.price)}</span>
+                                        <span className="text-gray-500 text-sm mr-2">
+                                            {ing.qty * totalPeople} {ing.unit}
+                                        </span>
+                                        <span className="font-bold text-sm text-[#111813]">
+                                            {formatMoney(ing.price * totalPeople)}
+                                        </span>
                                     </div>
                                 </li>
                             ))}
@@ -454,7 +436,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, budget, transactions, plann
                     </div>
                 </div>
 
-                {/* Modal Footer */}
                 <div className="p-4 border-t border-gray-200 bg-white">
                     <button onClick={() => setSelectedRecipe(null)} className="w-full h-12 bg-primary text-[#111813] font-bold rounded-xl hover:bg-primary-dark hover:text-white transition-colors">
                         Đóng

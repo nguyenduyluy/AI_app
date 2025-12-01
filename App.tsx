@@ -15,9 +15,11 @@ const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [budget, setBudget] = useState<BudgetData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  // Update state type to store PlannedMeal objects
   const [plannedMeals, setPlannedMeals] = useState<Record<string, PlannedMeal[]>>({});
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Helper to get total family members
+  const totalPeople = user ? (user.familyMembers.adults + user.familyMembers.kids) : 1;
 
   // 1. Load Data from LocalStorage on Mount
   useEffect(() => {
@@ -30,7 +32,6 @@ const App: React.FC = () => {
       setUser(JSON.parse(savedUser));
       setBudget(JSON.parse(savedBudget));
       if (savedTransactions) {
-        // Need to convert date strings back to Date objects
         const parsedTx = JSON.parse(savedTransactions).map((t: any) => ({
             ...t,
             date: new Date(t.date)
@@ -38,12 +39,10 @@ const App: React.FC = () => {
         setTransactions(parsedTx);
       }
       if (savedMeals) {
-        // Migration check: if old data was string[], reset or convert (Simple reset for safety here)
         try {
             const parsed = JSON.parse(savedMeals);
             const sampleKey = Object.keys(parsed)[0];
             if (sampleKey && parsed[sampleKey].length > 0 && typeof parsed[sampleKey][0] === 'string') {
-                // Old format detected, reset to avoid crash
                 setPlannedMeals({});
             } else {
                 setPlannedMeals(parsed);
@@ -67,7 +66,6 @@ const App: React.FC = () => {
     }
   }, [user, budget, transactions, plannedMeals, isInitialized]);
 
-  // Initial Budget Logic (Only runs if user exists but budget doesn't)
   useEffect(() => {
     if (user && !budget && isInitialized) {
       const loadBudget = async () => {
@@ -78,7 +76,6 @@ const App: React.FC = () => {
     }
   }, [user, budget, isInitialized]);
 
-  // Helper to calculate days remaining in the current month
   const getDaysRemainingInMonth = () => {
     const now = new Date();
     const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -86,7 +83,6 @@ const App: React.FC = () => {
     return Math.max(1, daysLeft);
   };
 
-  // CORE LOGIC: Recalculate Budget when Transactions Change
   const addTransaction = (newTx: Omit<Transaction, 'id'>) => {
     if (!budget) return;
 
@@ -97,13 +93,11 @@ const App: React.FC = () => {
 
     setTransactions(prev => [tx, ...prev]);
 
-    // Update Budget Numbers
     setBudget(prevBudget => {
         if (!prevBudget) return null;
 
         const amount = tx.amount;
         
-        // 1. Update category specific spent
         const updatedCategories = prevBudget.categoryBreakdown.map(cat => {
             if (cat.id === tx.categoryId) {
                 return { ...cat, spent: cat.spent + amount };
@@ -111,13 +105,9 @@ const App: React.FC = () => {
             return cat;
         });
 
-        // 2. Update Total Spent
         const newTotalSpent = prevBudget.spent + amount;
-
-        // 3. Update Total Remaining (Linked to Monthly Limit)
         const newRemaining = prevBudget.monthlyLimit - newTotalSpent;
 
-        // 4. Recalculate Daily Budget dynamically ("Smart Budget")
         const daysRemaining = getDaysRemainingInMonth();
         const newDailyBudget = Math.max(0, Math.round(newRemaining / daysRemaining));
 
@@ -146,6 +136,25 @@ const App: React.FC = () => {
     });
   };
 
+  const handleMarkAsShopped = (startDate: Date, endDate: Date) => {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
+      setPlannedMeals(prev => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach(key => {
+              const [y, m, d] = key.split('-').map(Number);
+              const dateObj = new Date(y, m - 1, d);
+              if (dateObj >= start && dateObj <= end) {
+                  updated[key] = updated[key].map(meal => ({ ...meal, isShopped: true }));
+              }
+          });
+          return updated;
+      });
+  };
+
   const handleLogin = () => {
     setCurrentScreen(Screen.ONBOARDING);
   };
@@ -166,7 +175,7 @@ const App: React.FC = () => {
       }
   };
 
-  if (!isInitialized) return null; // Prevent flicker
+  if (!isInitialized) return null;
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -187,6 +196,7 @@ const App: React.FC = () => {
                     onNavigate={setCurrentScreen}
                     onReset={handleReset}
                     onToggleMealStatus={handleToggleMealStatus}
+                    totalPeople={totalPeople}
                 />
              ) : <div>Loading...</div>}
           </Layout>
@@ -205,6 +215,8 @@ const App: React.FC = () => {
                     plannedMeals={plannedMeals}
                     onUpdatePlannedMeals={setPlannedMeals}
                     dailyLimit={budget ? budget.dailyLimit : 0}
+                    onMarkAsShopped={handleMarkAsShopped}
+                    totalPeople={totalPeople}
                 />
             </Layout>
         );
@@ -229,6 +241,7 @@ const App: React.FC = () => {
                         onNavigate={setCurrentScreen}
                         onReset={handleReset}
                         onToggleMealStatus={handleToggleMealStatus}
+                        totalPeople={totalPeople}
                     />
                  ) : <div>Loading...</div>}
             </Layout>

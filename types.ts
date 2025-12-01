@@ -72,6 +72,7 @@ export interface PlannedMeal {
   instanceId: string;
   recipeId: string;
   status: 'pending' | 'completed';
+  isShopped?: boolean;
 }
 
 export interface Transaction {
