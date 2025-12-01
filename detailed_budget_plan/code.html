@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trang Kế hoạch Ngân sách Chi tiết</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#13ec5b",
+            "background-light": "#f6f8f6",
+            "background-dark": "#102216",
+            "surface-light": "#ffffff",
+            "surface-dark": "#182c1f",
+            "text-primary-light": "#102216",
+            "text-primary-dark": "#f6f8f6",
+            "text-secondary-light": "#5a7864",
+            "text-secondary-dark": "#a9c7b6"
+          },
+          fontFamily: {
+            "display": ["Space Grotesk"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary-light dark:text-text-primary-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style="font-size: 28px;">arrow_back_ios_new</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center text-text-primary-light dark:text-text-primary-dark">Kế hoạch Ngân sách</h2>
+<div class="flex w-auto items-center justify-end">
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg pl-2 pr-2">
+<p class="text-base font-bold leading-normal tracking-[0.015em] shrink-0 text-text-secondary-light dark:text-text-secondary-dark">Tháng này</p>
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">expand_more</span>
+</div>
+</div>
+</div>
+<main class="flex flex-col gap-6 px-4 py-4">
+<div class="flex min-w-72 flex-1 flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+<p class="text-base font-medium leading-normal text-text-secondary-light dark:text-text-secondary-dark">Ngân sách hàng tháng</p>
+<div class="flex items-center gap-4">
+<div class="relative size-24">
+<svg class="size-full" height="36" viewBox="0 0 36 36" width="36" xmlns="http://www.w3.org/2000/svg">
+<circle class="stroke-primary/20" cx="18" cy="18" fill="none" r="16" stroke-width="3"></circle>
+<circle class="stroke-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="75 100" stroke-dashoffset="25" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">75%</span>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">đã chi</span>
+</div>
+</div>
+<div class="flex flex-col">
+<p class="tracking-light text-[32px] font-bold leading-tight truncate text-text-primary-light dark:text-text-primary-dark">1.850.000₫</p>
+<p class="text-base font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">Còn lại 3.500.000₫</p>
+</div>
+</div>
+</div>
+<div class="flex gap-3 px-1 overflow-x-hidden">
+<div class="flex w-full items-center justify-start gap-x-2 rounded-lg bg-primary/20 p-3">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">lightbulb</span>
+<p class="text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark flex-1">Bạn đang có xu hướng chi tiêu quá mức cho 'Ăn ngoài' trong tháng này.</p>
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark cursor-pointer" style="font-size: 20px;">close</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark px-4 py-3 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shrink-0 size-12">
+<span class="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style="font-size: 24px;">shopping_cart</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">Hàng tạp hóa</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">còn lại 210.000₫</p>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">390.000₫</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">trên 600.000₫</p>
+</div>
+</div>
+<div class="w-full overflow-hidden rounded-full bg-primary/20 h-1.5">
+<div class="h-full rounded-full bg-primary" style="width: 65%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark px-4 py-3 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shrink-0 size-12">
+<span class="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style="font-size: 24px;">confirmation_number</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">Giải trí</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">còn lại 60.000₫</p>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">240.000₫</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">trên 300.000₫</p>
+</div>
+</div>
+<div class="w-full overflow-hidden rounded-full bg-primary/20 h-1.5">
+<div class="h-full rounded-full bg-primary" style="width: 80%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark px-4 py-3 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shrink-0 size-12">
+<span class="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style="font-size: 24px;">bolt</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">Tiện ích</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">còn lại 115.000₫</p>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">85.000₫</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">trên 200.000₫</p>
+</div>
+</div>
+<div class="w-full overflow-hidden rounded-full bg-primary/20 h-1.5">
+<div class="h-full rounded-full bg-primary" style="width: 42.5%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark px-4 py-3 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shrink-0 size-12">
+<span class="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style="font-size: 24px;">directions_bus</span>
+</div>
+<div class="flex flex-1 flex-col justify-center">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">Di chuyển</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">còn lại 70.000₫</p>
+</div>
+<div class="shrink-0 text-right">
+<p class="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">80.000₫</p>
+<p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">trên 150.000₫</p>
+</div>
+</div>
+<div class="w-full overflow-hidden rounded-full bg-primary/20 h-1.5">
+<div class="h-full rounded-full bg-primary" style="width: 53.3%;"></div>
+</div>
+</div>
+</div>
+</main>
+<button class="fixed bottom-24 right-6 flex size-14 items-center justify-center rounded-full bg-primary text-white shadow-lg">
+<span class="material-symbols-outlined" style="font-size: 32px;">add</span>
+</button>
+<div class="sticky bottom-0 mt-auto flex justify-around border-t border-primary/20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-sm p-2">
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined">home</span>
+<p class="text-xs font-bold">Trang chủ</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<p class="text-xs font-medium">Kế hoạch bữa ăn</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">
+<span class="material-symbols-outlined">bar_chart</span>
+<p class="text-xs font-medium">Báo cáo</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-xs font-medium">Cài đặt</p>
+</div>
+</div>
+</div>
+</body></html>

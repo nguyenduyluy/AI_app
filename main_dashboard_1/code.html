@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lập kế hoạch bữa ăn</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13ec5b",
+              "background-light": "#f6f8f6",
+              "background-dark": "#102216",
+            },
+            fontFamily: {
+              "display": ["Space Grotesk", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111813] dark:text-white/90">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="flex size-12 shrink-0 items-center">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-[#111813] dark:text-white/90 gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</button>
+</div>
+<h1 class="text-[#111813] dark:text-white/90 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Lập kế hoạch bữa ăn</h1>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-[#111813] dark:text-white/90 gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined text-2xl">calendar_month</span>
+</button>
+</div>
+</header>
+<main class="flex-1 pb-28">
+<div class="px-4 pt-5 pb-3">
+<div class="flex items-center justify-center text-center">
+<button class="p-2"><span class="material-symbols-outlined">chevron_left</span></button>
+<div class="flex-1">
+<p class="text-lg font-bold">Tuần này</p>
+<p class="text-sm text-gray-500 dark:text-white/60">08/07 - 14/07</p>
+</div>
+<button class="p-2"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+<div class="flex overflow-x-auto gap-3 px-4 py-2 scrollbar-hide">
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg bg-primary min-w-[56px]">
+<p class="font-bold text-sm text-black">T2</p>
+<p class="font-bold text-xl text-black">8</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px]">
+<p class="font-bold text-sm">T3</p>
+<p class="font-bold text-xl">9</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px]">
+<p class="font-bold text-sm">T4</p>
+<p class="font-bold text-xl">10</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px]">
+<p class="font-bold text-sm">T5</p>
+<p class="font-bold text-xl">11</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px]">
+<p class="font-bold text-sm">T6</p>
+<p class="font-bold text-xl">12</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px]">
+<p class="font-bold text-sm">T7</p>
+<p class="font-bold text-xl">13</p>
+</div>
+<div class="flex flex-col items-center gap-1 p-2 rounded-lg min-w-[56px]">
+<p class="font-bold text-sm">CN</p>
+<p class="font-bold text-xl">14</p>
+</div>
+</div>
+<div class="px-4 py-4">
+<div class="flex flex-col gap-4 rounded-xl p-4 border border-[#dbe6df] dark:border-white/10 bg-white dark:bg-background-dark">
+<div class="flex justify-between items-center">
+<h3 class="text-lg font-bold text-[#111813] dark:text-white/90">Bữa ăn hôm nay</h3>
+<p class="text-sm text-gray-500 dark:text-white/60">Ước tính: <span class="font-bold text-[#111813] dark:text-white/90">250.000₫</span></p>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4">
+<img class="size-16 rounded-lg object-cover" data-alt="A bowl of pho with noodles, herbs, and meat." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF7Swsk14nZkY7WSQNm_xnqxy0yBbBB5rsO8cROGKLA7mGAck0STYDeMyqfNw-9qdVe822CZ5Hz6Eij_P7VYeSCVRKJInFE9r9khiws_luJ53bx_76gfdwndUkha0-8sYQ3dBI5HEz4ANIj_czNNkq6hqUtR76Ooio3sdTnA_UqlXY34vkHpswofbohxTNLzDJZMMeVIPkydwqKI3X0505o5cybapqY0pjEZjlhn0Il9yTJ6Y5eVjz8d9OSbD4zFQL_K3-KjYnoyo"/>
+<div class="flex-1">
+<p class="text-sm text-gray-500 dark:text-white/60">Bữa trưa</p>
+<p class="text-base font-bold text-[#111813] dark:text-white/90">Phở bò</p>
+</div>
+<button class="text-gray-400 dark:text-white/50"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<div class="flex items-center gap-4">
+<img class="size-16 rounded-lg object-cover" data-alt="A colorful and healthy salad bowl with fresh vegetables and quinoa." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATr8l4xu_vxW5KdmMwufTWWfeBeC5K39-JE49WvunGAxP4Zg3hlZUrSlDNXhUQxKa462JfpUKrCPSsRlYqH8BWkm-CU3ivqO-Ut-kb5COcRrO_6Ihw0tTaKhwFIiHzKYJUH2lN56_P8lqPnmqlVkb6ZsIxxLd8Hi-AV8lruJYj4CPGkYrHi-r8qjpPau7rah4AXMLjJmd6OkKI941EfJ_sIjGe9Y1kdsil2J_Os1u77HmfCcCkGCNsP3VxbKMYW7rpNZkNctIjs9I"/>
+<div class="flex-1">
+<p class="text-sm text-gray-500 dark:text-white/60">Bữa tối</p>
+<p class="text-base font-bold text-[#111813] dark:text-white/90">Salad Gà &amp; Diêm mạch</p>
+</div>
+<button class="text-gray-400 dark:text-white/50"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<button class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 dark:border-white/20 py-4 text-gray-500 dark:text-white/60">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-bold">Thêm bữa ăn</span>
+</button>
+</div>
+</div>
+</div>
+<div class="px-4 py-2">
+<div class="flex flex-col gap-4 rounded-xl p-4 border border-[#dbe6df] dark:border-white/10 bg-white dark:bg-background-dark">
+<div class="flex justify-between items-center">
+<h3 class="text-lg font-bold text-[#111813] dark:text-white/90">Gợi ý từ AI</h3>
+<a class="text-primary font-bold text-sm" href="#">Làm mới</a>
+</div>
+<div class="flex items-center gap-4">
+<img class="size-24 rounded-lg object-cover" data-alt="A picture of delicious grilled pork with rice noodles, fresh herbs, and dipping sauce (Bun Cha)." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmRtZlRVNmjpB17gjeLFUJg1pybr8f4uLY7gf0fNmy9MKsxI07cMInNBZZPqHF85eD2JagQt-QjtPhP4gNGA0y6n2vCnA7YM5b7lna6ajAPzavnho5rQo8HsdnKmRE_6TQPJp2ouGCZNStO1-CnDey6XU9_1mCB-kQfwe7uvfAaQlDmRYnn7cZffgnFevTFxOcjB478aI4ofd3jLoSSzCrUgjaC4V1EL0gFLCiRenPST3LyZJiykyEFIjrRM9jQcXwFOcVHAZ7jaQ"/>
+<div class="flex flex-col">
+<p class="text-sm text-gray-500 dark:text-white/60">Bữa tối • 30 phút</p>
+<p class="text-base font-bold text-[#111813] dark:text-white/90">Bún Chả Hà Nội</p>
+<p class="text-sm text-gray-600 dark:text-white/70 mt-1">Một món ăn cân bằng, tốt cho sức khỏe và phù hợp với ngân sách của bạn.</p>
+<div class="flex gap-2 mt-3">
+<button class="flex min-w-[40px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-primary text-[#111813] text-sm font-bold leading-normal tracking-[0.015em] gap-2">Thêm</button>
+<button class="flex min-w-[40px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-[#f0f4f2] dark:bg-white/10 dark:text-white/90 text-[#111813] text-sm font-bold leading-normal tracking-[0.015em] gap-2">Xem chi tiết</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 pt-4">
+<div class="flex justify-between items-center">
+<h3 class="text-lg font-bold text-[#111813] dark:text-white/90">Danh sách mua sắm</h3>
+<a class="text-primary font-bold text-sm" href="#">Xem tất cả</a>
+</div>
+<div class="mt-4 flex flex-col gap-3">
+<div class="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-white/5">
+<div class="flex items-center gap-3">
+<input class="size-5 rounded border-gray-300 text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="font-bold text-[#111813] dark:text-white/90">Thịt bò</p>
+<p class="text-sm text-gray-500 dark:text-white/60">500g</p>
+</div>
+</div>
+<p class="text-sm text-gray-600 dark:text-white/70">~ 125.000₫</p>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-white/5">
+<div class="flex items-center gap-3">
+<input class="size-5 rounded border-gray-300 text-primary focus:ring-primary" type="checkbox"/>
+<div>
+<p class="font-bold text-[#111813] dark:text-white/90">Bánh phở</p>
+<p class="text-sm text-gray-500 dark:text-white/60">1kg</p>
+</div>
+</div>
+<p class="text-sm text-gray-600 dark:text-white/70">~ 25.000₫</p>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm border-t border-black/10 dark:border-white/10 flex justify-around items-center px-4">
+<a class="flex flex-col items-center gap-1 text-gray-500 dark:text-white/60" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs">Bảng điều khiển</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-500 dark:text-white/60" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-xs">Ngân sách</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="text-xs font-bold">Bữa ăn</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-500 dark:text-white/60" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-xs">Báo cáo</span>
+</a>
+</nav>
+</div>
+</body></html>

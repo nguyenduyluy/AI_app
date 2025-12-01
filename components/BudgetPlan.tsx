@@ -16,123 +16,114 @@ const BudgetPlan: React.FC<BudgetPlanProps> = ({ budget, onBack }) => {
         ? Math.round((budget.spent / budget.monthlyLimit) * 100) 
         : 0;
 
-    // SVG Circle Math
-    // Dash array is "Value, 100". 
-    const dashArray = `${totalSpentPercent}, 100`;
-
     return (
-        <div className="flex-1 flex flex-col pb-24 bg-background-light animate-fade-in">
-             <header className="flex items-center p-4 bg-background-light sticky top-0 z-10">
-                <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
-                    <span className="material-symbols-outlined text-xl">arrow_back_ios_new</span>
-                </button>
-                <h1 className="flex-1 text-center font-bold text-lg">Kế hoạch Ngân sách</h1>
-                <div className="flex items-center gap-1 bg-white px-3 py-1 rounded-lg border border-gray-200">
-                    <span className="text-sm font-bold text-primary-dark">Tháng này</span>
-                    <span className="material-symbols-outlined text-sm">expand_more</span>
+        <div className="flex-1 flex flex-col pb-24 bg-background-light dark:bg-background-dark">
+             <header className="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+                <div className="flex size-12 shrink-0 items-center justify-start">
+                    <span className="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style={{fontSize: "28px"}}>arrow_back_ios_new</span>
+                </div>
+                <h2 className="text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center text-text-primary-light dark:text-text-primary-dark">Kế hoạch Ngân sách</h2>
+                <div className="flex w-auto items-center justify-end">
+                    <div className="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg pl-2 pr-2">
+                        <p className="text-base font-bold leading-normal tracking-[0.015em] shrink-0 text-text-secondary-light dark:text-text-secondary-dark">Tháng này</p>
+                        <span className="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">expand_more</span>
+                    </div>
                 </div>
             </header>
 
-            <main className="px-4 pt-2 space-y-6">
-                
-                {/* Circular Chart - Dynamic */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-6">
-                    <div className="relative size-32 shrink-0">
-                         <svg className="size-full -rotate-90" viewBox="0 0 36 36">
-                            <path
-                                className="text-gray-100"
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                            />
-                            <path
-                                className="text-primary transition-all duration-1000"
-                                strokeDasharray={dashArray}
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                            />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-2xl font-bold text-[#111813]">{totalSpentPercent}%</span>
-                            <span className="text-xs text-gray-500">đã chi</span>
+            <main className="flex flex-col gap-6 px-4 py-4">
+                {/* Monthly Budget Progress */}
+                <div className="flex min-w-72 flex-1 flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+                    <p className="text-base font-medium leading-normal text-text-secondary-light dark:text-text-secondary-dark">Ngân sách hàng tháng</p>
+                    <div className="flex items-center gap-4">
+                        <div className="relative size-24">
+                            <svg className="size-full" height="36" viewBox="0 0 36 36" width="36" xmlns="http://www.w3.org/2000/svg">
+                                <circle className="stroke-primary/20" cx="18" cy="18" fill="none" r="16" strokeWidth="3"></circle>
+                                <circle 
+                                    className="stroke-primary" 
+                                    cx="18" 
+                                    cy="18" 
+                                    fill="none" 
+                                    r="16" 
+                                    strokeDasharray={`${totalSpentPercent} 100`}
+                                    strokeDashoffset="25" 
+                                    strokeLinecap="round" 
+                                    strokeWidth="3"
+                                ></circle>
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-xl font-bold text-text-primary-light dark:text-text-primary-dark">{totalSpentPercent}%</span>
+                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">đã chi</span>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <p className="text-gray-500 font-medium mb-1">Ngân sách tháng</p>
-                        <p className="text-2xl font-bold text-[#111813]">{formatMoney(budget.monthlyLimit)}</p>
-                        <p className="text-sm text-green-600 mt-1">Còn lại: {formatMoney(budget.monthlyLimit - budget.spent)}</p>
+                        <div className="flex flex-col">
+                            <p className="tracking-light text-[32px] font-bold leading-tight truncate text-text-primary-light dark:text-text-primary-dark">{formatMoney(budget.spent)}</p>
+                            <p className="text-base font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">Còn lại {formatMoney(budget.monthlyLimit - budget.spent)}</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* AI Smart Alert - Conditional */}
-                {totalSpentPercent > 0 && (
-                    <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex gap-3 items-start">
-                        <span className="material-symbols-outlined text-primary mt-0.5">lightbulb</span>
-                        <div className="flex-1">
-                            <p className="text-sm text-[#111813] font-medium leading-relaxed">
-                                Hãy bắt đầu ghi lại chi tiêu để AI có thể phân tích và đưa ra lời khuyên.
-                            </p>
-                        </div>
-                        <button className="text-gray-400 hover:text-gray-600">
-                            <span className="material-symbols-outlined text-sm">close</span>
-                        </button>
+                {/* Smart Alert */}
+                <div className="flex gap-3 px-1 overflow-x-hidden">
+                    <div className="flex w-full items-center justify-start gap-x-2 rounded-lg bg-primary/20 p-3">
+                        <span className="material-symbols-outlined text-primary" style={{fontSize: "20px"}}>lightbulb</span>
+                        <p className="text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark flex-1">Bạn đang có xu hướng chi tiêu quá mức cho 'Ăn ngoài' trong tháng này.</p>
+                        <span className="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark cursor-pointer" style={{fontSize: "20px"}}>close</span>
                     </div>
-                )}
-                {totalSpentPercent === 0 && (
-                     <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-start">
-                        <span className="material-symbols-outlined text-blue-500 mt-0.5">info</span>
-                        <div className="flex-1">
-                            <p className="text-sm text-[#111813] font-medium leading-relaxed">
-                                Ngân sách tháng này đã sẵn sàng. Hãy bắt đầu thêm chi tiêu để theo dõi!
-                            </p>
-                        </div>
-                    </div>
-                )}
+                </div>
 
-                {/* Categories - Dynamic */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-lg">Chi tiết danh mục</h3>
+                {/* Category Breakdown */}
+                <div className="flex flex-col gap-2">
                     {budget.categoryBreakdown.map((cat, idx) => {
                         const catPercent = cat.limit > 0 ? (cat.spent / cat.limit) * 100 : 0;
                         const remaining = cat.limit - cat.spent;
 
                         return (
-                            <div key={idx} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="size-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-700">
-                                            <span className="material-symbols-outlined">{cat.icon}</span>
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-[#111813]">{cat.name}</p>
-                                            <p className="text-xs text-gray-500">còn lại {formatMoney(remaining)}</p>
-                                        </div>
+                            <div key={idx} className="flex flex-col gap-4 rounded-xl bg-surface-light dark:bg-surface-dark px-4 py-3 justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shrink-0 size-12">
+                                        <span className="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark" style={{fontSize: "24px"}}>{cat.icon || 'shopping_cart'}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-bold text-[#111813]">{formatMoney(cat.spent)}</p>
-                                        <p className="text-xs text-gray-400">trên {formatMoney(cat.limit)}</p>
+                                    <div className="flex flex-1 flex-col justify-center">
+                                        <p className="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">{cat.name}</p>
+                                        <p className="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">còn lại {formatMoney(remaining)}</p>
+                                    </div>
+                                    <div className="shrink-0 text-right">
+                                        <p className="text-base font-medium leading-normal text-text-primary-light dark:text-text-primary-dark">{formatMoney(cat.spent)}</p>
+                                        <p className="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">trên {formatMoney(cat.limit)}</p>
                                     </div>
                                 </div>
-                                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                                    <div 
-                                        className={`h-full rounded-full transition-all duration-1000 ${catPercent > 100 ? 'bg-red-500' : 'bg-primary'}`} 
-                                        style={{ width: `${Math.min(catPercent, 100)}%` }}
-                                    ></div>
+                                <div className="w-full overflow-hidden rounded-full bg-primary/20 h-1.5">
+                                    <div className="h-full rounded-full bg-primary" style={{width: `${Math.min(catPercent, 100)}%`}}></div>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
-
             </main>
 
-            <button className="fixed bottom-24 right-5 size-14 bg-primary text-[#111813] rounded-full shadow-lg shadow-primary/40 flex items-center justify-center hover:scale-105 transition-transform z-20">
-                <span className="material-symbols-outlined text-3xl">add</span>
+            <button className="fixed bottom-24 right-6 flex size-14 items-center justify-center rounded-full bg-primary text-white shadow-lg">
+                <span className="material-symbols-outlined" style={{fontSize: "32px"}}>add</span>
             </button>
+
+            <div className="sticky bottom-0 mt-auto flex justify-around border-t border-primary/20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-sm p-2">
+                <div className="flex flex-col items-center gap-1 p-2 rounded-lg text-primary">
+                    <span className="material-symbols-outlined">home</span>
+                    <p className="text-xs font-bold">Trang chủ</p>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">
+                    <span className="material-symbols-outlined">restaurant_menu</span>
+                    <p className="text-xs font-medium">Kế hoạch bữa ăn</p>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">
+                    <span className="material-symbols-outlined">bar_chart</span>
+                    <p className="text-xs font-medium">Báo cáo</p>
+                </div>
+                <div className="flex flex-col items-center gap-1 p-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">
+                    <span className="material-symbols-outlined">settings</span>
+                    <p className="text-xs font-medium">Cài đặt</p>
+                </div>
+            </div>
         </div>
     );
 };

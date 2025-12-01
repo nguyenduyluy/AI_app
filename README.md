@@ -1,114 +1,217 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🏠 FamPlan AI - Quản Lý Gia Đình Thông Minh
 
-# FamPlan AI - Family Budget & Meal Planner
+**FamPlan AI** là ứng dụng quản lý ngân sách gia đình và lập kế hoạch bữa ăn được hỗ trợ bởi AI Gemini của Google. Giúp gia đình quản lý tài chính hiệu quả với giao diện hiện đại và thân thiện.
 
-FamPlan AI is an intelligent family budget planning and meal planner application powered by Google's Gemini AI. It helps families manage their finances and plan meals efficiently.
+---
 
-View your app in AI Studio: https://ai.studio/apps/drive/1YtfUQmfJ8NcxYe1Wa0WttJFt-f7J7G66
+## ✨ Tính Năng Chính
 
-## Features
+### 🔐 **Hệ Thống Xác Thực**
+- Đăng nhập/Đăng ký hiện đại với tùy chọn đăng nhập xã hội
+- Bảo mật dữ liệu người dùng
 
-- 🔐 **Authentication System** - Secure user login and registration
-- 📊 **Dashboard** - Overview of family finances and meal plans
-- 💰 **Budget Planning** - AI-powered budget recommendations based on family size
-- 🍽️ **Meal Planner** - Intelligent meal planning with Vietnamese recipes
-- 📈 **Reports** - Detailed financial reports and analysis
-- 👨‍👩‍👧‍👦 **Onboarding** - Easy setup for family members and preferences
+### 👋 **Onboarding Thông Minh**
+- Hướng dẫn thiết lập từng bước cho gia đình
+- Cấu hình số lượng thành viên gia đình
+- Thiết lập mục tiêu tài chính
 
-## Tech Stack
+### 📊 **Bảng Điều Khiển**
+- Tổng quan ngân sách hàng ngày
+- Gợi ý kế hoạch bữa ăn
+- Danh sách giao dịch gần đây
 
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **AI**: Google Gemini API
-- **Storage**: LocalStorage for data persistence
+### 💰 **Lập Kế Hoạch Ngân Sách**
+- Theo dõi chi tiêu theo danh mục
+- Biểu đồ tiến độ chi tiêu
+- Cảnh báo vượt ngân sách
 
-## Run Locally
+### 🍽️ **Lập Kế Hoạch Bữa Ăn**
+- Lên kế hoạch bữa ăn theo tuần
+- Gợi ý công thức từ AI
+- Danh sách mua sắm thông minh
 
-**Prerequisites**: 
-- Node.js (v16 or higher)
-- npm or yarn
+### 🌙 **Hỗ Trợ Dark Mode**
+- Giao diện sáng/tối hoàn chỉnh
+- Bảo vệ mắt khi sử dụng ban đêm
 
-### Installation Steps:
+### 📱 **Responsive Design**
+- Tối ưu cho tất cả kích thước màn hình
+- Mobile-first experience
 
-1. **Install dependencies**:
+---
+
+## 🎨 UI Templates Sẵn Có
+
+| Tên Màn Hình | Mô Tả |
+|---|---|
+| **Đăng Nhập** | Giao diện xác thực hiện đại với tùy chọn đăng nhập xã hội |
+| **Đăng Ký** | Form đăng ký đầy đủ với xác thực mật khẩu |
+| **Welcome & Profile** | Hướng dẫn thiết lập hồ sơ gia đình 3 bước |
+| **Main Dashboard** | Tổng quan ngân sách, gợi ý bữa ăn, giao dịch gần đây |
+| **Meal Planner** | Lập kế hoạch bữa ăn theo tuần với gợi ý AI |
+| **Budget Detail** | Chi tiết ngân sách theo danh mục với biểu đồ |
+
+---
+
+## 🛠️ Tech Stack
+
+| Công Nghệ | Phiên Bản |
+|---|---|
+| **React** | 18.2.0 |
+| **TypeScript** | 5.2.2 |
+| **Vite** | 5.2.0 |
+| **Tailwind CSS** | 3.4.3 |
+| **Google Gemini API** | Latest |
+
+---
+
+## 🚀 Hướng Dẫn Nhanh
+
+### Yêu Cầu
+- Node.js v16 trở lên
+- npm hoặc yarn
+
+### Cài Đặt
+
+1. **Clone/Download dự án**
+   ```bash
+   cd d:\Desktop\AI_app
+   ```
+
+2. **Cài đặt dependencies**
    ```bash
    npm install
    ```
 
-2. **Set up environment variables**:
-   - Copy `.env.example` to `.env.local`
-   - Add your Google Gemini API key:
-   ```
-   VITE_GEMINI_API_KEY=your_google_gemini_api_key_here
+3. **Cấu hình biến môi trường**
+   - Sao chép `.env.example` thành `.env.local`
+   - Thêm API key Gemini của bạn:
+   ```env
+   VITE_GEMINI_API_KEY=your_api_key_here
    ```
 
-3. **Run the development server**:
+4. **Chạy development server**
    ```bash
    npm run dev
    ```
-   The app will be available at `http://localhost:3000`
+   Truy cập: http://localhost:5173
 
-4. **Build for production**:
+5. **Build cho production**
    ```bash
    npm run build
    ```
 
-## Deploy to Vercel
+---
 
-### Step 1: Push to GitHub
+## 📦 Deploy lên Vercel
+
+### Phương Pháp 1: GitHub Integration (Khuyến Nghị)
+
+1. Push code lên GitHub:
+   ```bash
+   git add .
+   git commit -m "Deploy FamPlan"
+   git push origin main
+   ```
+
+2. Trên Vercel Dashboard:
+   - Vào https://vercel.com/dashboard
+   - Click "Add New..." → "Project"
+   - Chọn repository GitHub
+   - Cấu hình:
+     - **Framework**: Vite
+     - **Build Command**: `npm run build`
+     - **Output**: `dist`
+
+3. Thêm Environment Variables:
+   - `VITE_GEMINI_API_KEY` = API key của bạn
+
+4. Click Deploy
+
+### Phương Pháp 2: Vercel CLI
+
 ```bash
-git add .
-git commit -m "Prepare for Vercel deployment"
-git push origin main
+npm install -g vercel
+vercel login
+vercel
 ```
 
-### Step 2: Deploy to Vercel
-1. Go to [Vercel](https://vercel.com)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Select the project and click "Continue"
-5. In the "Environment Variables" section, add:
-   - **Key**: `VITE_GEMINI_API_KEY`
-   - **Value**: Your Google Gemini API key
-6. Click "Deploy"
+---
 
-### Step 3: Configure Custom Domain (Optional)
-1. After deployment succeeds, go to Project Settings
-2. Navigate to "Domains"
-3. Add your custom domain
+## ⚙️ Scripts Dostępne
 
-### Troubleshooting
+```bash
+npm run dev      # Chạy server development
+npm run build    # Build cho production
+npm run preview  # Xem trước build production
+```
 
-If you see a blank page after deployment:
-1. Check the browser console for errors (F12)
-2. Verify all environment variables are set correctly
-3. Check the Vercel deployment logs for build errors
-4. Ensure the build command is set to `npm run build`
-5. Verify the output directory is set to `dist`
+---
 
-## Available Scripts
+## 📝 Biến Môi Trường
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
+| Tên | Mô Tả | Bắt Buộc |
+|---|---|---|
+| `VITE_GEMINI_API_KEY` | Google Gemini API Key | ✅ Có |
 
-## Environment Variables
+### Cách Lấy Gemini API Key
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VITE_GEMINI_API_KEY` | Google Gemini API Key for AI features | Yes |
-
-## Getting Your Gemini API Key
-
-1. Go to [Google AI Studio](https://aistudio.google.com)
+1. Vào https://aistudio.google.com
 2. Click "Get API Key"
-3. Create a new API key or use an existing one
-4. Copy the key and add it to your `.env.local` file
+3. Tạo hoặc chọn key hiện có
+4. Copy và thêm vào `.env.local`
 
-## License
+---
 
-This project is private and owned by FamPlan.
+## 🔧 Troubleshooting
 
+### Trang trắng sau deploy
+- Kiểm tra console trình duyệt (F12)
+- Đảm bảo API key đã được thiết lập
+- Xem logs trong Vercel Dashboard
+
+### Build thất bại
+```bash
+npm run build  # Kiểm tra lỗi TypeScript
+```
+
+### Không tìm module
+```bash
+npm install    # Cài đặt lại dependencies
+```
+
+---
+
+## 📄 Tài Liệu Thêm
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Hướng dẫn chi tiết deploy
+- **[vercel.json](./vercel.json)** - Cấu hình Vercel
+- **[.env.example](./.env.example)** - Mẫu biến môi trường
+
+---
+
+## 🤝 Đóng Góp
+
+Đây là dự án cá nhân. Để đề xuất tính năng mới, vui lòng tạo issue.
+
+---
+
+## 📄 Giấy Phép
+
+Dự án này được cấp phép dưới MIT License.
+
+---
+
+## 👨‍💻 Tác Giả
+
+**FamPlan Team** - Giải pháp quản lý gia đình thông minh
+
+---
+
+## 🌟 Donate Support
+
+Nếu bạn thích dự án này, hãy ⭐ repository!
+
+---
+
+**Được xây dựng bằng ❤️ cho gia đình**
